@@ -1,4 +1,4 @@
-export default function HomeRightbar() {
+export default function RightBar() {
     return (
         <div id="home-rightbar" className="h-svh max-h-svh min-[1260px]:w-[27rem] min-[1260px]:block hidden mt-2 bg-[#F0F2F5] px-2 py-3">
             <h5 className="mb-3 text-lg font-semibold text-gray-500">Contacts</h5>

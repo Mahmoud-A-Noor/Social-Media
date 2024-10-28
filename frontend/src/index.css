@@ -19,7 +19,7 @@
     }
   
     .form-button:hover {
-      @apply text-white transition-all duration-1000 bg-black;
+      @apply text-white transition-all duration-700 bg-black;
     }
   
     /* Navbar Icon */

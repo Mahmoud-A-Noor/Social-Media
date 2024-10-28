@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import Home from '../pages/home/pages/Home';
-import Video from '../pages/home/pages/Videos';
-import Groups from '../pages/home/pages/Groups';
-import Marketplace from '../pages/home/pages/Marketplace';
-import Games from '../pages/home/pages/Games';
+import Home from '../pages/home/Home/Home';
+import Video from '../pages/home/Videos/Videos';
+import Groups from '../pages/home/Groups/Groups';
+import Marketplace from '../pages/home/Marketplace/Marketplace';
+import Games from '../pages/home/Games/Games';
 
 const usePageSwitcher = (defaultPage = 'home') => {
   // Retrieve the saved theme from localStorage or use the default theme

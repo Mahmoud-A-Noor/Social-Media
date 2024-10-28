@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 export default function Login() {
     return (
         <div id="login" className="w-screen h-screen flex justify-center items-center md:bg-none xs:bg-[url('/src/assets/login.jpg')] xs:bg-cover">
@@ -12,7 +11,7 @@ export default function Login() {
                     <input className="form-input mb-[1em]" type="password" placeholder="Password" name="login_password" id="login-password" />
                     <div id="login-actions" className="flex flex-col text-center">
                         <button className="form-button md:bg-none xs:bg-white">Login</button>
-                        <span className="mt-1 text-sm w-full md:text-black xs:text-white">Don't have an account ? <a className="mt-1 text-[#0f83ff] font-bold" href="/register">Create Account</a></span>
+                        <span className="w-full mt-1 text-sm md:text-black xs:text-white">Don't have an account ? <a className="mt-1 text-[#0f83ff] font-bold" href="/register">Create Account</a></span>
                     </div>
                 </div>
             </div>

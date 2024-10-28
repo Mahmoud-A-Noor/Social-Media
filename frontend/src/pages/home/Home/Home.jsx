@@ -1,12 +1,11 @@
-import HomeSidebar from "./Home/Sidebar" 
-import CreatePost from "./Home/CreatePost";
-import Stories from "./Home/Stories";
-import Posts from "./Home/Posts";
-import HomeRightbar from "./Home/Rightbar"
+import HomeSidebar from "./Sidebar/Sidebar" 
+import HomeRightbar from "./Rightbar/RightBar"
+import CreatePost from "./CreatePost/CreatePost";
+import Stories from "./Stories/Stories";
+import Post from "./Post/Post";
 
 
 export default function Home() {
-
     
     return (
         <div className="flex w-screen">
@@ -15,7 +14,10 @@ export default function Home() {
                 <div className=" max-w-[37rem] w-full">
                     <CreatePost />
                     <Stories />
-                    <Posts />
+                    <div id="posts" className="w-full h-auto">
+                        <Post />
+                        <Post />
+                    </div>
                 </div>
             </div>
             <HomeRightbar />

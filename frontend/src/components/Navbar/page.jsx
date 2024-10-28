@@ -1,8 +1,8 @@
 
 
-import LeftPart from "./Components/LeftPart";
-import MiddlePart from "./Components/MiddlePart";
-import RightPart from "./Components/RightPart";
+import LeftPart from "./Parts/LeftPart";
+import MiddlePart from "./Parts/MiddlePart";
+import RightPart from "./Parts/RightPart";
 
 
 // eslint-disable-next-line react/prop-types

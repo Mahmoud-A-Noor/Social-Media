@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 
-import {Sad, Care, Haha, Angry, Love, Wow, Like} from "./facebook-reactions"
+import {Sad, Care, Haha, Angry, Love, Wow, Like} from "../../../../constants/facebook-reactions"
 
 import { HiDotsHorizontal } from "react-icons/hi";
 import { IoMdClose } from "react-icons/io";

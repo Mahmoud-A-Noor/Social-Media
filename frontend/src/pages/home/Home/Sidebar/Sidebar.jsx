@@ -6,7 +6,7 @@ import { IoIosArrowForward } from "react-icons/io";
 
 
 
-export default function HomeSidebar() {
+export default function SideBar() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const toggleSidebar = (e) => {
         e.stopPropagation(); // Prevent the outside click event from firing
