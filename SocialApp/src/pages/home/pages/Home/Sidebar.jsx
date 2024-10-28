@@ -39,14 +39,14 @@ export default function HomeSidebar() {
     
     return (
       <div id="home-sidebar" className="relative h-svh max-h-svh">
-        <div className="xs:max-md:hidden lg:w-[17em] w-[14em] h-full block bg-[#F0F2F5]">
+        <div className="900px:block hidden lg:w-[17em] w-[14em] h-full bg-[#F0F2F5] mt-2">
           <SidebarContent />
         </div>
         <div className="relative z-50 items-center hidden h-full xs:max-md:flex">
             <div ref={sidebarButtonRef} className={`absolute top-1/2 -translate-y-1/2 text-xl transition-all duration-500 w-[35px] h-[50px] rounded-tr-full rounded-br-full bg-black flex items-center justify-center ${isSidebarOpen?"translate-x-[13.65em] p-1":""}`} onClick={toggleSidebar}>
                 <IoIosArrowForward className={`text-2xl text-white transition-all duration-500 ${isSidebarOpen?"rotate-180":""}`} />
             </div>
-            <div ref={sidebarRef} className={`absolute ${isSidebarOpen?"left-0":"-left-[17em]"} w-[17em] h-full transition-all duration-500 bg-gray-200`}>
+            <div ref={sidebarRef} className={`absolute ${isSidebarOpen?"left-0":"-left-[17em]"} w-[17em] h-full transition-all duration-500 bg-[#F0F2F5]`}>
                 <SidebarContent />
             </div>
         </div>

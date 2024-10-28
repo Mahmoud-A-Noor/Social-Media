@@ -13,53 +13,53 @@ import { TbMessageFilled } from "react-icons/tb";
 export default function SidebarContent() {
     return (
         <div>
-            <div className="flex items-center px-2 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-2 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <div className="size-10">
                     <img src="/src/assets/person.png" alt="no image" className="w-full h-full rounded-full" />
                 </div>
                 <h4 className="text-lg ms-3">Maria John</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <FaUserFriends className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Friends</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <TbMessageFilled className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Messages</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <IoMdTime className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Memories</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <FaBookmark className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Saved</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <MdGroups className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Groups</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <MdOndemandVideo className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Videos</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <MdOutlineStorefront className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Marketplace</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <VscFeedback className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Feeds</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <MdOutlineStorefront className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Marketplace</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <GiConsoleController className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Games</h4>
             </div>
-            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+            <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <RxActivityLog className="text-3xl rounded-full" />
                 <h4 className="text-lg ms-3">Activities</h4>
             </div>
