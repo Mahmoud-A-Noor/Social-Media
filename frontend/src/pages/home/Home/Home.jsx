@@ -1,14 +1,10 @@
-import { useState } from "react";
-
 import HomeSidebar from "./Sidebar/Sidebar" 
 import HomeRightbar from "./Rightbar/RightBar"
 import CreatePost from "./CreatePost/CreatePost";
 import Stories from "./Stories/Stories";
 import Post from "./Post/Post";
-import Menu from "../../../components/Menu/Menu"
 
 export default function Home() {
-
 
     return (
         <div className="flex w-screen">
