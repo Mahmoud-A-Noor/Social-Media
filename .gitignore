@@ -191,3 +191,6 @@ backend/*.tsbuildinfo
 # Ignore Next.js specific files if using Next.js
 backend/.next/
 backend/out/
+
+
+backend/.env
