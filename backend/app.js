@@ -3,6 +3,8 @@ const passport = require('./config/passport');
 const errorHandler = require('./middlewares/errorHandler');
 const authMiddleware = require('./middlewares/authMiddleware');
 const authRoutes = require('./routes/authRoutes');
+const socialRoutes = require("./routes/socialRoutes");
+const postRoutes = require("./routes/postRoutes");
 const app = express();
 
 
@@ -17,6 +19,9 @@ app.use((req, res, next) => {
 });
 
 app.use('/auth', authRoutes);
+app.use('/social', socialRoutes);
+app.use('/posts', postRoutes);
+
 
 
 app.use(errorHandler);
