@@ -1,10 +1,15 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../context/authContext'; // Custom hook for authentication
+import { useAuth } from '../../context/authContext';
 
 const PrivateRoute = ({ children }) => {
-    const { isAuthenticated } = useAuth(); // Check if the user is authenticated
+    const { isAuthenticated, loading } = useAuth();
 
-    // Redirect to login if the user is not authenticated
+    // Show nothing (or a loader) while loading
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    // Redirect to login if not authenticated
     return isAuthenticated ? children : <Navigate to="/login" />;
 };
 

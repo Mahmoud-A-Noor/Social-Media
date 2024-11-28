@@ -6,20 +6,20 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
         if (token) {
-            setIsAuthenticated(true)
             getAndSetMyData()
         }
+        setLoading(false);
     }, []);
 
     const login = (tokens) => {
         // Store tokens in localStorage
         localStorage.setItem('accessToken', tokens.accessToken);
         localStorage.setItem('refreshToken', tokens.refreshToken);
-        setIsAuthenticated(true)
         getAndSetMyData()
         window.location.href = '/';
     };
@@ -36,11 +36,13 @@ export const AuthProvider = ({ children }) => {
         axiosInstance.get('/user/me')
             .then(response => setUser(response.data))
             .catch(error => console.error("Failed to fetch user data", error));
+
+        setIsAuthenticated(true)
     }
 
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+        <AuthContext.Provider value={{ loading, isAuthenticated, user, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

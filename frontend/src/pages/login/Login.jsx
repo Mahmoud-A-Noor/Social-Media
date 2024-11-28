@@ -2,11 +2,14 @@ import {useState} from "react";
 import {useAuth} from "../../context/authContext.jsx";
 import axiosInstance from "../../config/axios.js";
 
+import {ToastContainer, toast, Flip} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const { login } = useAuth(); // Get login function from context
 
     const handleSubmit = async (e) => {
@@ -17,7 +20,17 @@ export default function Login() {
             const { message, user, tokens } = response.data;
             login(tokens); // Save tokens to local storage
         } catch (err) {
-            setError('Login failed. Please check your credentials.');
+            toast.error('Login failed. Please check your credentials.', {
+                position: "bottom-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Flip,
+            });
         }
     };
 
@@ -37,6 +50,19 @@ export default function Login() {
                     </div>
                 </form>
             </div>
+            <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                transition: Flip
+            />
         </div>
     )
 }
