@@ -1,5 +1,7 @@
 import { createContext, useState, useEffect, useContext } from 'react';
+import { useNavigate } from "react-router-dom";
 import axiosInstance from '../config/axios';
+import axios from "axios";
 
 const AuthContext = createContext();
 
@@ -7,6 +9,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
@@ -16,12 +19,26 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    const login = (tokens) => {
+    const login = async(userData) => {
+        const response = await axiosInstance.post('/auth/login', userData);
+        const { message, user, tokens } = response.data;
         // Store tokens in localStorage
         localStorage.setItem('accessToken', tokens.accessToken);
         localStorage.setItem('refreshToken', tokens.refreshToken);
         getAndSetMyData()
-        window.location.href = '/';
+        navigate("/")
+    };
+
+    const register = async (userData) => {
+        try {
+            // Make API call to register user
+            const {username, email, password} = userData;
+            const response = await axiosInstance.post("/auth/register", userData);
+            await login({email, password});
+        } catch (error) {
+            console.error("Registration failed:", error.response?.data || error.message);
+            throw error;
+        }
     };
 
     const logout = () => {
@@ -42,7 +59,7 @@ export const AuthProvider = ({ children }) => {
 
 
     return (
-        <AuthContext.Provider value={{ loading, isAuthenticated, user, login, logout }}>
+        <AuthContext.Provider value={{ loading, isAuthenticated, user, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

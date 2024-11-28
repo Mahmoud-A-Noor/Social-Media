@@ -32,7 +32,7 @@ exports.followUser = async (req, res) => {
         await currentUser.save();
     }
 
-    res.status(200).json({ message: `You are now following ${targetUser.name}` });
+    res.status(200).json({ message: `You are now following ${targetUser.username}` });
     } catch (error) {
     res.status(500).json({ error: error.message });
     }
@@ -56,7 +56,7 @@ exports.unfollowUser = async (req, res) => {
         await currentUser.save();
         await targetUser.save();
 
-        res.status(200).json({ message: `You have unfollowed ${targetUser.name}` });
+        res.status(200).json({ message: `You have unfollowed ${targetUser.username}` });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -99,7 +99,7 @@ exports.addFriend = async (req, res) => {
         await currentUser.save();
         await targetUser.save();
 
-        res.status(200).json({ message: `You and ${targetUser.name} are now friends and following each other` });
+        res.status(200).json({ message: `You and ${targetUser.username} are now friends and following each other` });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -127,7 +127,7 @@ exports.unfriend = async (req, res) => {
         await currentUser.save();
         await targetUser.save();
 
-        res.status(200).json({ message: `You have unfriended ${targetUser.name}` });
+        res.status(200).json({ message: `You have unfriended ${targetUser.username}` });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

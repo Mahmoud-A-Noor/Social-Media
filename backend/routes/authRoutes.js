@@ -10,9 +10,9 @@ const authController = require('../controllers/authController');
 const router = express.Router();
 
 router.post('/register', [
-  check('name').not().isEmpty().withMessage('Name is required'),
-  check('email').isEmail().withMessage('Invalid email format'),
-  check('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+    check('username').not().isEmpty().withMessage('Username is required').isLength({ min: 6 }).withMessage('Username length must be at least 6 characters'),
+    check('email').isEmail().withMessage('Invalid email format'),
+    check('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
 ], authController.register);
 
 router.post('/login', [
