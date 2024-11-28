@@ -5,4 +5,6 @@ const User = require('../models/User');
 
 router.get('/status/:userId', userController.getUserStatus);
 
+router.get('/me', userController.getMyData);
+
 module.exports = router;
