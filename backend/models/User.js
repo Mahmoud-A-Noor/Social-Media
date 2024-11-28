@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   profileImage: String,
+  status: { type: String, default: 'offline' },
   createdAt: { type: Date, default: Date.now }
 });
 
