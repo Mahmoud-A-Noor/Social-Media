@@ -15,11 +15,11 @@
   
     /* Form Button */
     .form-button {
-      @apply p-2 mt-4 text-lg font-bold border border-gray-700;
+      @apply p-2 mt-4 text-lg font-bold border border-gray-700 transition-all duration-700;
     }
   
     .form-button:hover {
-      @apply text-white transition-all duration-700 bg-black;
+      @apply text-white bg-black;
     }
   
     /* Navbar Icon */

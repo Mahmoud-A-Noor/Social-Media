@@ -1,7 +1,9 @@
 
 // eslint-disable-next-line react/prop-types
-export default function Modal({isOpen, onClose, children}) {
-    
+import { IoMdClose } from "react-icons/io";
+
+export default function Modal({isOpen=false, header="default header", width="24rem", onClose, children}) {
+
     if (!isOpen) return null;
     
     // Usage
@@ -19,9 +21,17 @@ export default function Modal({isOpen, onClose, children}) {
     // </Modal>
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-[9999999999]">
             <div className="absolute inset-0" onClick={onClose}></div>
-            <div className="relative max-w-full p-6 bg-white rounded-lg shadow-lg w-96">
+            <div className="relative max-w-full p-3 bg-white rounded-lg shadow-lg" style={{width:width}}>
+                <div
+                    className="absolute top-2 right-2 p-2 text-2xl transition-all duration-150 rounded-full hover:bg-gray-100 cursor-pointer"
+                    onClick={onClose}>
+                    <IoMdClose/>
+                </div>
+                <div className="flex items-center justify-center border-b-2">
+                    <h1 className="text-xl font-bold pb-2">{header}</h1>
+                </div>
                 {children}
             </div>
         </div>
