@@ -1,11 +1,13 @@
-const { Server } = require('socket.io'); // Correct way to import the Socket.io server
+const { Server } = require('socket.io');
 const User = require('../models/User');
 
+let io; // Declare the shared `io` instance
+
 const initializeSocket = (server) => {
-    const io = new Server(server, {
+    io = new Server(server, {
         cors: {
             origin: process.env.CLIENT_URL, // Replace with your frontend's URL
-            methods: ['GET', 'POST'],
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
         },
     });
 
@@ -14,6 +16,9 @@ const initializeSocket = (server) => {
         const userId = socket.handshake.query.userId;
 
         if (userId) {
+            // Join the user to a room named after their userId
+            socket.join(userId);
+
             // Mark user as online
             updateUserStatus(userId, 'online');
 
@@ -42,4 +47,12 @@ const initializeSocket = (server) => {
     return io;
 };
 
-module.exports = initializeSocket;
+// Export the `io` instance for other modules to use
+const getIoInstance = () => {
+    if (!io) {
+        throw new Error("Socket.io has not been initialized!");
+    }
+    return io;
+};
+
+module.exports = { initializeSocket, getIoInstance };

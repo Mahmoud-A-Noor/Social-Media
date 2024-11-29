@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const socialRoutes = require("./routes/socialRoutes");
 const postRoutes = require("./routes/postRoutes");
 const userRoutes = require("./routes/userRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const cors = require('cors');
 
@@ -35,6 +36,7 @@ app.use('/auth', authRoutes);
 app.use('/social', socialRoutes);
 app.use('/posts', postRoutes);
 app.use('/user', userRoutes);
+app.use('/notifications', notificationRoutes);
 
 
 
