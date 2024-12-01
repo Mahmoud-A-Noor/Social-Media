@@ -2,7 +2,10 @@ const Post = require('../models/Post');
 const Reaction = require('../models/Reaction');
 const Comment = require('../models/Comment');
 const Notification = require('../models/Notification');
+
 const { getIoInstance } = require('../config/socket');
+const cloudinary = require("../config/cloudinary");
+
 
 
 exports.createPost = async (req, res) => {
@@ -31,6 +34,12 @@ exports.deletePost = async (req, res) => {
         await Reaction.deleteMany({ post: postId });
         await Comment.deleteMany({ post: postId });
 
+        // Delete associated file from Cloudinary
+        if (post.media && post.media.url) {
+            const publicId = post.media.url.split('/').pop().split('.')[0]; // Extract publicId from URL
+            await cloudinary.uploader.destroy(publicId);
+        }
+
         await Post.findByIdAndDelete(postId);
 
         res.status(200).json({ message: 'Post deleted successfully' });
@@ -53,7 +62,18 @@ exports.updatePost = async (req, res) => {
         
         // Update post content
         post.text = text || post.text;
-        post.media = media || post.media;
+
+        if (media) {
+            // Delete the old file from Cloudinary
+            if (post.media && post.media.url) {
+                const oldPublicId = post.media.url.split('/').pop().split('.')[0];
+                await cloudinary.uploader.destroy(oldPublicId);
+            }
+
+            // Add the new media file
+            post.media = media;
+        }
+
         await post.save();
         
         res.status(200).json({ message: 'Post updated successfully', post });

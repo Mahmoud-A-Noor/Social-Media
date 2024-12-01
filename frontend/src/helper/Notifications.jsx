@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from "../config/axios.js";
 import socket from '../config/socket';
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
 
     const markAllAsRead = () => {
-        axios.post('/notifications/mark-read')
+        axiosInstance.post('/notifications/mark-read')
             .then(() => {
                 setNotifications((prev) => prev.map((notification) => ({ ...notification, isRead: true })));
             })
@@ -20,7 +20,7 @@ const Notifications = () => {
         });
 
         // Fetch existing notifications
-        axios.get('/notifications')
+        axiosInstance.get('/notifications')
             .then((res) => setNotifications(res.data))
             .catch(console.error);
 

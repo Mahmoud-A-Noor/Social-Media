@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from "../config/axios.js";
 
 const UserStatus = ({ userId }) => {
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        axios.get(`/user/status/${userId}`)
+        axiosInstance.get(`/user/status/${userId}`)
             .then(response => setStatus(response.data.status))
             .catch(error => console.error('Error fetching user status:', error));
     }, [userId]);

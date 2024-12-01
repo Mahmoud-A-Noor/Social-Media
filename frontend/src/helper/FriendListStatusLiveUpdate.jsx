@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import socket from '../config/socket';
-import axios from "axios";
+import axiosInstance from "../config/axios.js";
 
 const FriendsList = () => {
     const [friends, setFriends] = useState([]);
 
     useEffect(() => {
         // Fetch friends from API
-        axios.get('/user/friends')
+        axiosInstance.get('/user/friends')
             .then(response => setFriends(response.data))
             .catch(error => console.error('Error fetching friends:', error));
 
