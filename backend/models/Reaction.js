@@ -7,7 +7,7 @@ const reactionSchema = new mongoose.Schema({
     required: true
   },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  post: { type: mongoose.Schema.Types.ObjectId, ref: 'Post', required: true },
+  post: { type: mongoose.Schema.Types.ObjectId, ref: 'Posts', required: true },
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -7,10 +7,11 @@ const postSchema = new mongoose.Schema({
     type: { type: String, enum: ['image', 'video', 'audio'], default: 'image' }
   },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  feeling:String,
   reactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reaction' }],
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
   shares: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Post', postSchema);
+module.exports = mongoose.model('Posts', postSchema);

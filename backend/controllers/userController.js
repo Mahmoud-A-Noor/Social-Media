@@ -31,3 +31,28 @@ exports.getMyData = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+exports.addStory = async (req, res) => {
+    const {storyUrl} = req.body;
+    try {
+        // Access user ID from the decoded token
+        const userId = req.user.id;
+
+        // Find the user by ID in the database
+        const user = await User.findById(userId); // Exclude password field
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.story = storyUrl;
+
+        await user.save();
+
+        // Send user data as response
+        res.status(200).json(user);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

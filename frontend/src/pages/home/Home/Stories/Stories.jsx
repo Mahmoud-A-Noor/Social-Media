@@ -1,4 +1,5 @@
 import StoriesCarouselItem from "./StoriesCarouselItem";
+import CreateStoryCarouselItem from "./CreateStoryCarouselItem";
 
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
@@ -42,6 +43,7 @@ export default function Stories() {
                 centerMode={true}
                 
             >
+                <CreateStoryCarouselItem />
                 <StoriesCarouselItem /> 
                 <StoriesCarouselItem /> 
                 <StoriesCarouselItem />

@@ -9,12 +9,13 @@ const cloudinary = require("../config/cloudinary");
 
 
 exports.createPost = async (req, res) => {
-    const { text, media } = req.body;
+    const { text, media, feeling } = req.body;
     const userId = req.user._id;
     try {
         const post = await Post.create({
         text,
         media,
+        feeling,
         author: userId
         });
         res.status(201).json(post);
@@ -28,7 +29,7 @@ exports.deletePost = async (req, res) => {
     try {
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
+            return res.status(404).json({ error: 'Posts not found' });
         }
         
         await Reaction.deleteMany({ post: postId });
@@ -42,19 +43,19 @@ exports.deletePost = async (req, res) => {
 
         await Post.findByIdAndDelete(postId);
 
-        res.status(200).json({ message: 'Post deleted successfully' });
+        res.status(200).json({ message: 'Posts deleted successfully' });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
 
 exports.updatePost = async (req, res) => {
-    const { postId, text, media } = req.body;
+    const { postId, text, media, feeling } = req.body;
     const userId = req.user._id
     try {
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
+            return res.status(404).json({ error: 'Posts not found' });
         }
         if (!post.author.equals(userId)) {
             return res.status(403).json({ error: 'Unauthorized action' });
@@ -62,6 +63,8 @@ exports.updatePost = async (req, res) => {
         
         // Update post content
         post.text = text || post.text;
+        // Update post feeling
+        post.feeling = feeling || post.feeling;
 
         if (media) {
             // Delete the old file from Cloudinary
@@ -76,7 +79,7 @@ exports.updatePost = async (req, res) => {
 
         await post.save();
         
-        res.status(200).json({ message: 'Post updated successfully', post });
+        res.status(200).json({ message: 'Posts updated successfully', post });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -121,7 +124,7 @@ exports.removeReaction = async (req, res) => {
     try {
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
+            return res.status(404).json({ error: 'Posts not found' });
         }
 
         const reaction = await Reaction.findById(reactionId);
@@ -209,7 +212,7 @@ exports.deleteComment = async (req, res) => {
     try {
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
+            return res.status(404).json({ error: 'Posts not found' });
         }
 
         const comment = await Comment.findById(commentId);
