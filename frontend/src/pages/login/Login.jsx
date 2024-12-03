@@ -16,7 +16,7 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            login({ email, password }); // Save tokens to local storage
+            await login({ email, password }); // Save tokens to local storage
         } catch (err) {
             toast.error('Login failed. Please check your credentials.', {
                 position: "bottom-right",

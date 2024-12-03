@@ -20,13 +20,18 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async(userData) => {
-        const response = await axiosInstance.post('/auth/login', userData);
-        const { message, user, tokens } = response.data;
-        // Store tokens in localStorage
-        localStorage.setItem('accessToken', tokens.accessToken);
-        localStorage.setItem('refreshToken', tokens.refreshToken);
-        getAndSetMyData()
-        navigate("/")
+        try{
+            const response = await axiosInstance.post('/auth/login', userData);
+            const { message, user, tokens } = response.data;
+            // Store tokens in localStorage
+            localStorage.setItem('accessToken', tokens.accessToken);
+            localStorage.setItem('refreshToken', tokens.refreshToken);
+            getAndSetMyData()
+            navigate("/")
+        }catch(error){
+            console.error("Login failed:", error.response?.data || error.message);
+            throw error;
+        }
     };
 
     const register = async (userData) => {
@@ -42,17 +47,25 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        setIsAuthenticated(false)
-        setUser(null);
-        window.location.href = '/login';
+        try{
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            setIsAuthenticated(false)
+            setUser(null);
+            window.location.href = '/login';
+        }catch(error){
+            console.error("Logout failed:", error.response?.data || error.message);
+            throw error;
+        }
     };
 
     const getAndSetMyData = async () => {
         axiosInstance.get('/user/me')
             .then(response => setUser(response.data))
-            .catch(error => console.error("Failed to fetch user data", error));
+            .catch(error =>{
+                console.error("Failed to fetch user data", error)
+                throw error;
+            });
 
         setIsAuthenticated(true)
     }
