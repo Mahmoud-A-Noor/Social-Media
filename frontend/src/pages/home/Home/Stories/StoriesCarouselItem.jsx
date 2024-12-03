@@ -1,7 +1,9 @@
-export default function StoriesCarouselItem() {
+import MediaViewer from "../../../../components/Media/MediaViewer.jsx";
+
+export default function StoriesCarouselItem({fileUrl}) {
     return (
         <div className="w-24 mx-1 overflow-hidden h-44 rounded-xl">
-            <img className="w-full h-full" src="/src/assets/story.png" alt="" />
+            <MediaViewer fileUrl={fileUrl} />
         </div>
     )
 }

@@ -44,16 +44,18 @@ export default function Stories() {
                 
             >
                 <CreateStoryCarouselItem />
-                <StoriesCarouselItem /> 
-                <StoriesCarouselItem /> 
-                <StoriesCarouselItem />
-                <StoriesCarouselItem />
-                <StoriesCarouselItem />
-                <StoriesCarouselItem /> 
-                <StoriesCarouselItem /> 
-                <StoriesCarouselItem />
-                <StoriesCarouselItem />
-                <StoriesCarouselItem />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/video/upload/v1733225073/1ceb3ff3-4cbe-48e9-9b72-e41643975f15.mp4" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733225249/187871ec-9be3-4764-ba52-24567599b9b9.pdf" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733147326/ed8b8054-8fa8-4971-9580-6b94a343e366.jpg" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/video/upload/v1733225073/1ceb3ff3-4cbe-48e9-9b72-e41643975f15.mp4" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733225249/187871ec-9be3-4764-ba52-24567599b9b9.pdf" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733147326/ed8b8054-8fa8-4971-9580-6b94a343e366.jpg" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/video/upload/v1733225073/1ceb3ff3-4cbe-48e9-9b72-e41643975f15.mp4" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733225249/187871ec-9be3-4764-ba52-24567599b9b9.pdf" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733147326/ed8b8054-8fa8-4971-9580-6b94a343e366.jpg" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/video/upload/v1733225073/1ceb3ff3-4cbe-48e9-9b72-e41643975f15.mp4" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733225249/187871ec-9be3-4764-ba52-24567599b9b9.pdf" />
+                <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733147326/ed8b8054-8fa8-4971-9580-6b94a343e366.jpg" />
             </Carousel>
         </div>
     )

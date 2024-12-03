@@ -19,4 +19,6 @@ mongoose.connect(process.env.MONGO_URI, {
 
 
   server.listen(3000, () => console.log('Server running on http://localhost:3000'));
+  server.setTimeout(10 * 60 * 1000); // 10 minutes
 }).catch(error => console.error('Database connection error:', error));
+
