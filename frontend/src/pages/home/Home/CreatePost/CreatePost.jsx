@@ -1,4 +1,4 @@
-import {useState, useRef} from "react";
+import {useState, useRef, useEffect} from "react";
 
 import Modal from "../../../../components/Modal/Modal.jsx"
 import axiosInstance from "../../../../config/axios.js";
@@ -22,8 +22,10 @@ export default function CreatePost() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     isModalOpen ? document.body.style.overflow="hidden" : document.body.style.overflow="auto"; // prevent page from scrolling when modal is opened
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+    const emojiPickerRef = useRef(null);
+    const emojiPickerButtonRef = useRef(null);
 
-    const ref = useRef(null);
+    const textAreaRef = useRef(null);
 
     const [postContent, setPostContent] = useState('');
     const [file, setFile] = useState(null);
@@ -45,6 +47,30 @@ export default function CreatePost() {
         transition: Flip,
     }
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                emojiPickerRef.current &&
+                !emojiPickerRef.current.contains(event.target) && // Click outside the picker
+                emojiPickerButtonRef.current &&
+                !emojiPickerButtonRef.current.contains(event.target) // Click outside the button
+            ) {
+                setIsEmojiPickerOpen(false);
+            }
+        };
+
+        // Add event listener to capture clicks outside
+        document.addEventListener("mousedown", handleClickOutside);
+
+        // Clean up the event listener
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+    const toggleEmojiPicker = (event) => {
+        event.stopPropagation(); // Prevent the event from propagating to the document listener
+        setIsEmojiPickerOpen((prev) => !prev);
+    };
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
@@ -129,9 +155,9 @@ export default function CreatePost() {
     };
 
     const handleInput = (e) => {
-        if (ref.current) {
-            ref.current.style.height = "auto"; // Reset height to calculate new height
-            ref.current.style.height = `${Math.min(e.target.scrollHeight, 200)}px`; // Limit height to 200px
+        if (textAreaRef.current) {
+            textAreaRef.current.style.height = "auto"; // Reset height to calculate new height
+            textAreaRef.current.style.height = `${Math.min(e.target.scrollHeight, 200)}px`; // Limit height to 200px
         }
     };
 
@@ -141,9 +167,9 @@ export default function CreatePost() {
         sym.forEach((item)=>codeArray.push("0x" + item))
         let emoji = String.fromCodePoint(...codeArray)
         setPostContent((prev)=>prev + emoji)
-        if (ref.current) {
-            ref.current.style.height = "auto"; // Reset height to calculate new height
-            ref.current.style.height = `${Math.min(ref.current.scrollHeight, 200)}px`; // Limit height to 200px
+        if (textAreaRef.current) {
+            textAreaRef.current.style.height = "auto"; // Reset height to calculate new height
+            textAreaRef.current.style.height = `${Math.min(textAreaRef.current.scrollHeight, 200)}px`; // Limit height to 200px
         }
     }
 
@@ -220,18 +246,18 @@ export default function CreatePost() {
                     <textarea
                         className="border-0 resize-none focus:outline-0 w-full my-3 text-xl px-2"
                         placeholder="What's on your mind, Mahmoud?"
-                        ref={ref}
+                        ref={textAreaRef}
                         style={{maxHeight: "200px"}}
                         rows={1}
                         onInput={handleInput}
                         value={postContent}
                         onChange={e => setPostContent(e.target.value)}
                     />
-                    <IoHappyOutline
-                        className="text-5xl sm:max-md:text-xl xs:max-sm:text-lg ms-auto rounded-full p-2 cursor-pointer hover:bg-gray-100"
-                        onClick={() => setIsEmojiPickerOpen((prev) => !prev)}/>
+                    <div ref={emojiPickerButtonRef} onClick={toggleEmojiPicker} >
+                        <IoHappyOutline className="text-5xl sm:max-md:text-xl xs:max-sm:text-lg ms-auto rounded-full p-2 cursor-pointer hover:bg-gray-100"/>
+                    </div>
                     {isEmojiPickerOpen &&
-                        <div className="absolute top-0 -right-[350px] z-30">
+                        <div ref={emojiPickerRef} className="absolute top-0 -right-[350px] z-30">
                             <Picker data={data} onEmojiSelect={addEmoji}/>
                         </div>
                     }
