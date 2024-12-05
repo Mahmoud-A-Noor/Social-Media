@@ -14,7 +14,6 @@ import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import {ToastContainer, toast, Flip} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Select from 'react-select'
 
 
 
@@ -30,9 +29,9 @@ export default function CreatePost() {
     const [file, setFile] = useState(null);
     const [fileUrl, setFileUrl] = useState(null);
 
-    const [isVisible, setIsVisible] = useState(false);
+    const [isReactionsVisible, setIsReactionsVisible] = useState(false);
     const [feeling, setFeeling] = useState(null);
-    const [visibility, setVisibility] = useState("public");
+    const [postVisibility, setPostVisibility] = useState("public");
 
     const toastConfig = {
         position: "bottom-right",
@@ -67,17 +66,11 @@ export default function CreatePost() {
         }
         try {
             // Create the post
-            console.log({
-                text: postContent,
-                media: { url: uploadedFileUrl, type: file?.type?.split("/")[0] || "unknown" },
-                feeling: feeling,
-                visibility: visibility
-            })
             await axiosInstance.post("/posts", {
                 text: postContent,
                 media: { url: uploadedFileUrl, type: file?.type?.split("/")[0] || "unknown" },
                 feeling: feeling,
-                visibility: visibility
+                postVisibility: postVisibility
             });
             toast.success("Posts created successfully!", toastConfig);
         } catch (error) {
@@ -92,7 +85,7 @@ export default function CreatePost() {
         setFileUrl(null);
         setIsModalOpen(false);
         setFeeling(null)
-        setVisibility("public")
+        setPostVisibility("public")
     };
 
     const handleFileSelect = (e) => {
@@ -158,14 +151,16 @@ export default function CreatePost() {
     const handleFeelingChange = (feel) => {
         if(!feeling){
             setFeeling(feel);
+            setIsModalOpen(true)
         }else{
             if(feeling === feel){
                 setFeeling(null)
             }else{
                 setFeeling(feel)
+                setIsModalOpen(true)
             }
         }
-        setIsVisible(false);
+        setIsReactionsVisible(false);
     }
 
     const renderFeelingEmoji = () => {
@@ -184,9 +179,7 @@ export default function CreatePost() {
         else return <span className="text-base font-normal">is <span className="font-bold text-yellow-500">Shocked</span></span>
     }
 
-    function handleVisibilityChange(e) {
-        setVisibility((prev)=>e.target.value)
-    }
+
 
     return (
         <div id="create-post" className="p-3 mt-5 bg-white rounded-lg shadow-md xs:max-sm:px-4">
@@ -209,7 +202,7 @@ export default function CreatePost() {
                         <div>
                             <h4 className="text-base font-semibold">Mahmoud Noor {feeling && renderFeelingText()}</h4>
                             <div className="relative">
-                                <select value={visibility} onChange={handleVisibilityChange}
+                                <select value={postVisibility} onChange={()=>setPostVisibility((prev)=>e.target.value)}
                                         className="w-[5rem] max-h-[1.8rem] bg-transparent placeholder:text-slate-400 text-slate-700 text-xs border border-slate-200 rounded px-1 py-1 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-400 shadow-sm focus:shadow-md appearance-none cursor-pointer">
                                     <option value="public">Public</option>
                                     <option value="friend">Friends</option>
@@ -292,12 +285,12 @@ export default function CreatePost() {
                 </label>
                 <div className="relative group flex-1">
                     <div
-                        className="flex items-center justify-center py-3 rounded-lg hover:bg-gray-200 xs:max-sm:px-1 cursor-pointer" onMouseEnter={() => setIsVisible(true)} onMouseLeave={() => setIsVisible(false)}>
+                        className="flex items-center justify-center py-3 rounded-lg hover:bg-gray-200 xs:max-sm:px-1 cursor-pointer" onMouseEnter={() => setIsReactionsVisible(true)} onMouseLeave={() => setIsReactionsVisible(false)}>
                         <div className="text-2xl sm:max-md:text-xl xs:max-sm:text-lg w-6 h-6">
                             {feeling?renderFeelingEmoji():<IoHappyOutline />}
                         </div>
                         <span className="text-base font-semibold text-gray-500 sm:max-md:text-sm xs:max-sm:text-xs ms-2">{feeling?feeling:"Feeling"}</span>
-                        <div className={`absolute -left-3 -top-14 mt-2 bg-white border border-gray-300 shadow-lg z-[99999] rounded-full transition-opacity duration-300 ${isVisible ? "opacity-100 visible" : "opacity-0 invisible"}`}>
+                        <div className={`absolute -left-3 -top-14 mt-2 bg-white border border-gray-300 shadow-lg z-[99999] rounded-full transition-opacity duration-300 ${isReactionsVisible ? "opacity-100 visible" : "opacity-0 invisible"}`}>
                                 <div
                                     className="flex px-2 py-1 transition-opacity delay-500 opacity-0 group-hover:opacity-100">
                                     <div

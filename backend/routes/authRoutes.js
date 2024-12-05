@@ -29,30 +29,8 @@ router.get('/google/callback', passport.authenticate('google', { session: false 
   res.json({ user: req.user, tokens });
 });
 
-router.post('/refresh-token', async (req, res) => {
-  const { refreshToken } = req.body;
-
-  if (!refreshToken) {
-    return res.status(401).json({ message: 'Refresh token required' });
-  }
-
-  try {
-    // Verify the refresh token
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-
-    const userId = decoded.id;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    // Generate a new access token
-    const tokens = generateJWTokens(user);
-
-    res.json({ tokens });
-  } catch (error) {
-    res.status(403).json({ message: 'Invalid refresh token' });
-  }
-});
+// Refresh Token
+router.post('/refresh-token', authController.refreshToken);
 
 
 module.exports = router;

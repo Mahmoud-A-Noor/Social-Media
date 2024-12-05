@@ -2,6 +2,7 @@ const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const { generateJWTokens } = require("../utils/CreateJWTokens")
 const User = require('../models/User');
+const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
   const errors = validationResult(req);
@@ -67,3 +68,29 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: `Server error: ${error}` });
   }
 };
+
+
+exports.refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: 'Refresh token required' });
+  }
+
+  try {
+    // Verify the refresh token
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+    const userId = decoded.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Generate a new access token
+    const tokens = generateJWTokens(user);
+
+    res.json( tokens );
+  } catch (error) {
+    res.status(403).json({ message: 'Invalid refresh token' });
+  }
+}
