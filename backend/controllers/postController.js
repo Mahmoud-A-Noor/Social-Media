@@ -1,4 +1,5 @@
 const Post = require('../models/Post');
+const User = require('../models/User');
 const Reaction = require('../models/Reaction');
 const Comment = require('../models/Comment');
 const Notification = require('../models/Notification');
@@ -9,18 +10,71 @@ const cloudinary = require("../config/cloudinary");
 
 
 exports.createPost = async (req, res) => {
-    const { text, media, feeling } = req.body;
+    const { text, media, feeling, visibility="public" } = req.body;
     const userId = req.user._id;
     try {
         const post = await Post.create({
         text,
         media,
         feeling,
+        visibility,
         author: userId
         });
         res.status(201).json(post);
     } catch (error) {
         res.status(400).json({ error: error.message });
+    }
+};
+
+exports.getPosts = async (req, res) => {
+    try {
+        const userId = req.user.id; // Current user's ID
+        const { page = 1, limit = 10 } = req.query;
+
+        const currentUser = await User.findById(userId);
+
+        if (!currentUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const skip = (page - 1) * limit;
+
+        // Query to filter posts based on visibility rules and blocked users
+        const query = {
+            author: { $nin: currentUser.blockedUsers }, // Exclude blocked users
+            $or: [
+                { visibility: 'public' }, // Public posts
+                { visibility: 'friends', author: { $in: currentUser.friends } }, // Friends-only posts
+                { visibility: 'private', author: userId }, // User's own private posts
+            ],
+        };
+
+        // Find posts, ensuring no duplicates by using `aggregate` with `$group`
+        const posts = await Post.aggregate([
+            { $match: query }, // Apply the filter query
+            { $sort: { createdAt: -1 } }, // Sort by creation date
+            { $skip: skip }, // Pagination: Skip posts
+            { $limit: parseInt(limit) }, // Pagination: Limit posts
+            {
+                $group: {
+                    _id: '$_id', // Group by unique post IDs
+                    doc: { $first: '$$ROOT' }, // Keep the whole document
+                },
+            },
+            { $replaceRoot: { newRoot: '$doc' } }, // Unwind the grouped document
+        ]);
+
+        // Populate required fields
+        const populatedPosts = await Post.populate(posts, [
+            { path: 'author', select: 'username profileImage' },
+            { path: 'tags', select: 'username' },
+            { path: 'reactions' },
+            { path: 'comments' },
+        ]);
+
+        res.status(200).json(populatedPosts);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching posts', error: error.message });
     }
 };
 

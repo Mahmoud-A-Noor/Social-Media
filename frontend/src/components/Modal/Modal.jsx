@@ -13,12 +13,12 @@ export default function Modal({isOpen=false, header="default header", width="24r
     // const closeModalHandler = () => setOpenModal(null);
     
     // <button onClick={() => openModalHandler('modal1')} className="px-4 py-2 mt-4 text-white bg-green-500 rounded hover:bg-green-600">
-    //     Open Modal 1
+    //     Open MediaViewerModal 1
     // </button>
-    // <Modal isOpen={openModal === 'modal1'} onClose={closeModalHandler}>
-    //     <h2 className="text-lg font-semibold">Modal 1 Title</h2>
-    //     <p>This is the content of Modal 1.</p>
-    // </Modal>
+    // <MediaViewerModal isOpen={openModal === 'modal1'} onClose={closeModalHandler}>
+    //     <h2 className="text-lg font-semibold">MediaViewerModal 1 Title</h2>
+    //     <p>This is the content of MediaViewerModal 1.</p>
+    // </MediaViewerModal>
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-[9999999999]">

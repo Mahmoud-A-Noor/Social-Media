@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Routes for post actions
 router.post('/', postController.createPost);          // Create a post
+router.get('/', postController.getPosts);                  // Get posts
 router.delete('/', postController.deletePost);        // Delete a post
 router.put('/', postController.updatePost);
 

@@ -14,7 +14,7 @@ import { PiMessengerLogo } from "react-icons/pi";
 import { PiShareFat } from "react-icons/pi";
 
 
-export default function Post() {
+export default function Post({post}) {
 
     const [isPostDropdownOpen, setIsPostDropdownOpen] = useState(false)
     const togglePostDropdown = (e) => {

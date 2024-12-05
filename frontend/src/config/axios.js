@@ -23,7 +23,7 @@ axiosInstance.interceptors.response.use(
         const originalRequest = error.config;
 
         // If the error is 401 (Unauthorized) and we haven't already tried refreshing the token
-        if (error.response.status === 401 && !originalRequest._retry) {
+        if (error.response && error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {

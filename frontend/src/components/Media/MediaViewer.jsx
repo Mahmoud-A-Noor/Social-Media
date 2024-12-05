@@ -1,17 +1,19 @@
-import React, { useState } from "react";
-import ReactDOM from "react-dom";
-
-import {Worker, Viewer, ViewMode, SpecialZoomLevel} from '@react-pdf-viewer/core';
-import '@react-pdf-viewer/core/lib/styles/index.css';
+import React, { useState, useEffect } from "react";
+import { BrokenCirclesLoader } from "react-loaders-kit";
+import MediaViewerModal from "./MediaViewerModal.jsx";
+import ImageViewer from "./ImageViewer/ImageViewer.jsx";
+import VideoViewer from "./VideoViewer/VideoViewer.jsx";
+import PdfViewer from "./PdfViewer/PdfViewer.jsx";
 import { thumbnailPlugin } from '@react-pdf-viewer/thumbnail';
-import pageThumbnailPlugin from './pageThumbnailPlugin';
+import pageThumbnailPlugin from './PdfViewer/pageThumbnailPlugin.jsx';
+import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/thumbnail/lib/styles/index.css';
-
-
 
 const MediaViewer = ({ fileUrl }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState(null);
+    const [loading, setLoading] = useState(true); // Track loading state
+    const [videoThumbnail, setVideoThumbnail] = useState(null);
 
     const thumbnailPluginInstance = thumbnailPlugin();
     const { Cover } = thumbnailPluginInstance;
@@ -19,117 +21,80 @@ const MediaViewer = ({ fileUrl }) => {
         PageThumbnail: <Cover getPageIndex={() => 0} />,
     });
 
+    useEffect(() => {
+        if (["mp4", "mkv", "webm", "ogg", "avi", "mpeg", "mov"].includes(fileUrl.split(".").pop().toLowerCase())) {
+            setLoading(true);
+
+            const video = document.createElement("video");
+            video.src = fileUrl;
+            video.crossOrigin = "anonymous";
+            video.currentTime = 5;
+
+            video.addEventListener("loadeddata", () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const thumbnail = canvas.toDataURL("image/png");
+                setVideoThumbnail(thumbnail);
+                setLoading(false);
+            });
+        }
+    }, [fileUrl]);
+
     const openModal = (content) => {
         setModalContent(content);
         setIsModalOpen(true);
-        document.body.classList.add("overflow-hidden"); // Prevent body scroll
+        document.body.classList.add("overflow-hidden");
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
         setModalContent(null);
-        document.body.classList.remove("overflow-hidden"); // Restore body scroll
+        document.body.classList.remove("overflow-hidden");
     };
-    // Extract file extension from URL
+
     const fileExtension = fileUrl.split(".").pop().toLowerCase();
 
     const renderContent = () => {
         if (["png", "jpeg", "jpg", "gif", "webp", "svg"].includes(fileExtension)) {
-        return (
-            <div className="w-full h-full" onClick={() => openModal(
-                <div className="relative flex justify-center items-center max-w-[80%] h-full mx-auto">
-                    <button
-                        onClick={closeModal}
-                        className="absolute top-2 right-2 text-red-700 text-4xl font-bold z-[9999999999]"
-                    >
-                        &times;
-                    </button>
-                    <img src={fileUrl} alt="Preview" className="w-full h-auto"/>
-                </div>
-            )}>
-                <img src={fileUrl} alt="Preview" className="w-full h-full cursor-pointer"/>
-            </div>
-        );
+            return <ImageViewer fileUrl={fileUrl} openModal={openModal} closeModal={closeModal} />;
         }
 
         if (["mp4", "mkv", "webm", "ogg", "avi", "mpeg", "mov"].includes(fileExtension)) {
             return (
-                <div onClick={() => openModal(
-                    <div className="relative flex justify-center items-center max-w-[80%] h-full mx-auto">
-                        <button
-                            onClick={closeModal}
-                            className="absolute top-2 right-2 text-red-700 text-4xl font-bold z-[9999999999]"
-                        >
-                            &times;
-                        </button>
-                        <video controls className="w-full h-full object-contain">
-                            <source src={fileUrl}/>
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
-                )} className="w-full h-full">
-                    <video controls className="w-full h-full object-cover cursor-pointer">
-                        <source src={fileUrl}/>
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-        )
-            ;
+                <VideoViewer
+                    fileUrl={fileUrl}
+                    videoThumbnail={videoThumbnail}
+                    loading={loading}
+                    openModal={openModal}
+                    closeModal={closeModal}
+                />
+            );
         }
 
         if (fileExtension === "pdf") {
             return (
-                <div
-                    className="w-full h-full cursor-pointer flex justify-center items-center bg-gray-200"
-                    onClick={() =>
-                        openModal(
-                            <div className="relative max-w-[90%] h-full mx-auto">
-                                <button
-                                    onClick={closeModal}
-                                    className="absolute top-2 right-2 text-red-700 text-4xl font-bold z-[9999999999]"
-                                >
-                                    &times;
-                                </button>
-                                <Worker workerUrl={`pdf.worker.min.js`}>
-                                    <Viewer fileUrl={fileUrl}/>
-                                </Worker>
-                            </div>
-                        )
-                    }
-                >
-                    <Worker workerUrl={`pdf.worker.min.js`}>
-                        <Viewer fileUrl={fileUrl}
-                                            plugins={[pageThumbnailPluginInstance, thumbnailPluginInstance]}/>
-                                </Worker>
-                            </div>
-                        )
-                        ;
-                    }
+                <PdfViewer
+                    fileUrl={fileUrl}
+                    openModal={openModal}
+                    closeModal={closeModal}
+                    pageThumbnailPluginInstance={pageThumbnailPluginInstance}
+                    thumbnailPluginInstance={thumbnailPluginInstance}
+                />
+            );
+        }
 
         return <div>Unsupported file type.</div>;
     };
 
-        return (
+    return (
         <>
-            {/* Display the content inside carousel */}
-            <div className="w-full h-full">{renderContent()}</div>
-
-            {/* Portal for full-screen modal */}
-            {isModalOpen &&
-                ReactDOM.createPortal(
-                    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-80 flex justify-center items-center z-[999999999] overflow-auto">
-                        <div className="relative w-full h-full">
-                            <button
-                                onClick={closeModal}
-                                className="absolute top-2 right-2 text-red-700 text-4xl font-bold z-[9999999999]"
-                            >
-                                &times;
-                            </button>
-                            <div className="w-full h-auto">{modalContent}</div>
-                        </div>
-                    </div>,
-                    document.body
-                )}
+            <div className="w-full h-full bg-white">{renderContent()}</div>
+            <MediaViewerModal isOpen={isModalOpen} content={modalContent} closeModal={closeModal} />
         </>
     );
 };

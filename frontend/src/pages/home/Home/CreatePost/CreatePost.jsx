@@ -2,19 +2,19 @@ import {useState, useRef} from "react";
 
 import Modal from "../../../../components/Modal/Modal.jsx"
 import axiosInstance from "../../../../config/axios.js";
+import uploadFile from "../../../../utils/uploadFile.js";
+import {Angry, Care, Haha, Sad, Wow, Like} from "../../../../constants/facebook-reactions.jsx";
+
 
 import { RiLiveFill } from "react-icons/ri";
 import { FaPhotoVideo } from "react-icons/fa";
 import { IoHappyOutline } from "react-icons/io5";
 import { IoDocumentText } from "react-icons/io5";
-
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
-
 import {ToastContainer, toast, Flip} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import uploadFile from "../../../../utils/uploadFile.js";
-import {Angry, Care, Haha, Sad, Wow, Like} from "../../../../constants/facebook-reactions.jsx";
+import Select from 'react-select'
 
 
 
@@ -32,6 +32,7 @@ export default function CreatePost() {
 
     const [isVisible, setIsVisible] = useState(false);
     const [feeling, setFeeling] = useState(null);
+    const [visibility, setVisibility] = useState("public");
 
     const toastConfig = {
         position: "bottom-right",
@@ -50,38 +51,48 @@ export default function CreatePost() {
         e.preventDefault();
         
         if (!postContent && !file) {
-            toast.error("Posts content or file is required.", toastConfig);
+            toast.error("Post content or file is required.", toastConfig);
             return;
         }
 
         // Upload the file
+        let uploadedFileUrl = fileUrl
         try {
-            if(!fileUrl){
-                const uploadedFileUrl = await uploadFile(file);
+            if(file){
+                uploadedFileUrl = await uploadFile(file);
                 setFileUrl(uploadedFileUrl); // Save the file URL
             }
         } catch (error) {
             toast.error(error.message, toastConfig);
         }
-
         try {
             // Create the post
-            const postResponse = await axiosInstance.post("/posts", {
+            console.log({
                 text: postContent,
-                media: { url: fileUrl, type: file?.type?.split("/")[0] || "unknown" },
-                feeling: renderFeelingText()
+                media: { url: uploadedFileUrl, type: file?.type?.split("/")[0] || "unknown" },
+                feeling: feeling,
+                visibility: visibility
+            })
+            await axiosInstance.post("/posts", {
+                text: postContent,
+                media: { url: uploadedFileUrl, type: file?.type?.split("/")[0] || "unknown" },
+                feeling: feeling,
+                visibility: visibility
             });
-            toast.success("Posts created successfully!", );
-
-            setPostContent("");
-            setFile(null);
-            setFileUrl(null);
-            setIsModalOpen(false);
-            setFeeling(null)
+            toast.success("Posts created successfully!", toastConfig);
         } catch (error) {
             setIsModalOpen(false);
+            console.error(error)
             toast.error("Error creating post. Please try again.", toastConfig);
         }
+
+        // reset all fields
+        setPostContent("");
+        setFile(null);
+        setFileUrl(null);
+        setIsModalOpen(false);
+        setFeeling(null)
+        setVisibility("public")
     };
 
     const handleFileSelect = (e) => {
@@ -173,7 +184,9 @@ export default function CreatePost() {
         else return <span className="text-base font-normal">is <span className="font-bold text-yellow-500">Shocked</span></span>
     }
 
-
+    function handleVisibilityChange(e) {
+        setVisibility((prev)=>e.target.value)
+    }
 
     return (
         <div id="create-post" className="p-3 mt-5 bg-white rounded-lg shadow-md xs:max-sm:px-4">
@@ -193,7 +206,23 @@ export default function CreatePost() {
                         <div className="size-10">
                             <img className="w-full h-full rounded-full " src="/src/assets/person.png" alt=""/>
                         </div>
-                        <h4 className="text-lg font-semibold">Mahmoud Noor {feeling && renderFeelingText()}</h4>
+                        <div>
+                            <h4 className="text-base font-semibold">Mahmoud Noor {feeling && renderFeelingText()}</h4>
+                            <div className="relative">
+                                <select value={visibility} onChange={handleVisibilityChange}
+                                        className="w-[5rem] max-h-[1.8rem] bg-transparent placeholder:text-slate-400 text-slate-700 text-xs border border-slate-200 rounded px-1 py-1 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-400 shadow-sm focus:shadow-md appearance-none cursor-pointer">
+                                    <option value="public">Public</option>
+                                    <option value="friend">Friends</option>
+                                    <option value="private">Private</option>
+                                </select>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                     strokeWidth="1.2" stroke="currentColor"
+                                     className="h-5 w-5 ml-1 absolute top-[0.3rem] left-[3.5rem] text-slate-700">
+                                    <path strokeLinecap="round" strokeLinejoin="round"
+                                          d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
+                                </svg>
+                            </div>
+                        </div>
                     </div>
                     <textarea
                         className="border-0 resize-none focus:outline-0 w-full my-3 text-xl px-2"
