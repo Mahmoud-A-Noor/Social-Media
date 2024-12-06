@@ -74,7 +74,7 @@ export default function CreatePost() {
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!postContent && !file) {
             toast.error("Post content or file is required.", toastConfig);
             return;
@@ -317,61 +317,61 @@ export default function CreatePost() {
                         </div>
                         <span className="text-base font-semibold text-gray-500 sm:max-md:text-sm xs:max-sm:text-xs ms-2">{feeling?feeling:"Feeling"}</span>
                         <div className={`absolute -left-3 -top-14 mt-2 bg-white border border-gray-300 shadow-lg z-[99999] rounded-full transition-opacity duration-300 ${isReactionsVisible ? "opacity-100 visible" : "opacity-0 invisible"}`}>
+                            <div
+                                className="flex px-2 py-1 transition-opacity delay-500 opacity-0 group-hover:opacity-100">
                                 <div
-                                    className="flex px-2 py-1 transition-opacity delay-500 opacity-0 group-hover:opacity-100">
-                                    <div
-                                        className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
-                                        onClick={() => {
-                                            handleFeelingChange("Sad")
-                                        }}>
-                                        <Sad/>
-                                    </div>
-                                    <div
-                                        className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
-                                        onClick={() => {
-                                            handleFeelingChange("Shocked")
-                                        }}>
-                                        <Wow/>
-                                    </div>
-                                    <div
-                                        className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
-                                        onClick={() => {
-                                            handleFeelingChange("Care")
-                                        }}>
-                                        <Care/>
-                                    </div>
-                                    <div
-                                        className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
-                                        onClick={() => {
-                                            handleFeelingChange("Angry")
-                                        }}>
-                                        <Angry/>
-                                    </div>
-                                    <div
-                                        className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
-                                        onClick={() => {
-                                            handleFeelingChange("Haha")
-                                        }}>
-                                        <Haha/>
-                                    </div>
+                                    className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
+                                    onClick={() => {
+                                        handleFeelingChange("Sad")
+                                    }}>
+                                    <Sad/>
+                                </div>
+                                <div
+                                    className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
+                                    onClick={() => {
+                                        handleFeelingChange("Shocked")
+                                    }}>
+                                    <Wow/>
+                                </div>
+                                <div
+                                    className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
+                                    onClick={() => {
+                                        handleFeelingChange("Care")
+                                    }}>
+                                    <Care/>
+                                </div>
+                                <div
+                                    className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
+                                    onClick={() => {
+                                        handleFeelingChange("Angry")
+                                    }}>
+                                    <Angry/>
+                                </div>
+                                <div
+                                    className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
+                                    onClick={() => {
+                                        handleFeelingChange("Haha")
+                                    }}>
+                                    <Haha/>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <ToastContainer
-                    position="bottom-right"
-                    autoClose={5000}
-                    hideProgressBar={false}
-                    newestOnTop
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    theme="light"
-                    transition: Flip
-                />
             </div>
-            )
-            }
+            <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                transition: Flip
+            />
+        </div>
+    )
+}

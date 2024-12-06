@@ -21,23 +21,26 @@ export default function Posts() {
             const response = await axiosInstance.get(`/posts?page=${page}&limit=${limit}`);
             const newPosts = response.data;
 
-            // Filter out any posts that already exist in the current posts array
-            const uniquePosts = newPosts.filter(post =>
-                !posts.some(existingPost => existingPost._id === post._id)
-            );
+            // Use functional state update to ensure up-to-date posts
+            setPosts((prevPosts) => {
+                const uniquePosts = newPosts.filter(post =>
+                    !prevPosts.some(existingPost => existingPost._id === post._id)
+                );
 
-            if (uniquePosts.length < limit) {
-                setHasMore(false);  // If less than 10 posts, no more posts available
-            }
+                if (uniquePosts.length < limit) {
+                    setHasMore(false);  // If less than {limit} posts, no more posts available
+                }
 
-            setPosts((prevPosts) => [...prevPosts, ...uniquePosts]);
+                return [...prevPosts, ...uniquePosts];
+            });
+
             setPage(page + 1); // Increment page number for next fetch
         } catch (err) {
             console.error('Error fetching posts:', err);
         }
     };
 
-    // Fetch initial posts when the component is mounted
+// Fetch initial posts when the component is mounted
     useEffect(() => {
         fetchPosts();
     }, []);

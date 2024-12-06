@@ -49,20 +49,11 @@ exports.getPosts = async (req, res) => {
             ],
         };
 
-        // Find posts, ensuring no duplicates by using `aggregate` with `$group`
-        const posts = await Post.aggregate([
-            { $match: query }, // Apply the filter query
-            { $sort: { createdAt: -1 } }, // Sort by creation date
-            { $skip: skip }, // Pagination: Skip posts
-            { $limit: parseInt(limit) }, // Pagination: Limit posts
-            {
-                $group: {
-                    _id: '$_id', // Group by unique post IDs
-                    doc: { $first: '$$ROOT' }, // Keep the whole document
-                },
-            },
-            { $replaceRoot: { newRoot: '$doc' } }, // Unwind the grouped document
-        ]);
+        // Find posts, ensuring no duplicates by applying pagination directly
+        const posts = await Post.find(query)
+            .sort({ createdAt: -1 }) // Sort by creation date
+            .skip(skip) // Pagination: Skip posts
+            .limit(parseInt(limit)); // Pagination: Limit posts
 
         // Populate required fields
         const populatedPosts = await Post.populate(posts, [
