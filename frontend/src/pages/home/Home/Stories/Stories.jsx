@@ -7,6 +7,7 @@ import axiosInstance from "../../../../config/axios.js";
 
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import {GooeyLoader2, JellyBounceLoader} from "react-loaders-kit";
 
 
 
@@ -15,6 +16,7 @@ export default function Stories() {
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(4);
+    const [loading, setLoading] = useState(true);
 
     // Fetch stories from the backend
     const fetchStories = async () => {
@@ -38,6 +40,8 @@ export default function Stories() {
             setPage(page + 1); // Increment page number for next fetch
         } catch (err) {
             console.error('Error fetching stories:', err);
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -74,25 +78,34 @@ export default function Stories() {
 
     return (
         <div id="stories" className="h-auto mx-2 mt-5">
-            <Carousel
-                swipeable={true}
-                responsive={carouselResponsiveConfig}
-                customTransition="all 0.5s"
-                transitionDuration={500}
-                containerClass="carousel-container w-full"
-                itemClass="carousel-item-padding-40-px"
-                centerMode={true}
-            >
-                <CreateStoryCarouselItem />
-                {stories.map((story, index) => (
-                    <>
-                        <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/video/upload/v1733225073/1ceb3ff3-4cbe-48e9-9b72-e41643975f15.mp4" />
-                        {/*<StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733225249/187871ec-9be3-4764-ba52-24567599b9b9.pdf" />*/}
-                        {/*<StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733147326/ed8b8054-8fa8-4971-9580-6b94a343e366.jpg" />*/}
-                    </>
-                ))}
+            {loading ? (
+                // Show loader while loading
+                <div className="flex justify-center items-center h-64">
+                    <GooeyLoader2 loading={loading} size={100} />
+                </div>
+            ) : (
+                <Carousel
+                    swipeable={true}
+                    responsive={carouselResponsiveConfig}
+                    customTransition="all 0.5s"
+                    transitionDuration={500}
+                    containerClass="carousel-container w-full"
+                    itemClass="carousel-item-padding-40-px"
+                    centerMode={true}
+                >
+                    <CreateStoryCarouselItem />
+                    {stories.map((story, index) => (
+                        <>
+                            <StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/video/upload/v1733225073/1ceb3ff3-4cbe-48e9-9b72-e41643975f15.mp4" />
+                            {/*<StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733225249/187871ec-9be3-4764-ba52-24567599b9b9.pdf" />*/}
+                            {/*<StoriesCarouselItem fileUrl="https://res.cloudinary.com/dagxxuxb7/image/upload/v1733147326/ed8b8054-8fa8-4971-9580-6b94a343e366.jpg" />*/}
+                        </>
+                    ))}
+                </Carousel>
+            )
 
-            </Carousel>
+            }
+
         </div>
     )
 }
