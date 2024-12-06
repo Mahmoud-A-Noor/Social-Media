@@ -1,7 +1,10 @@
 import React from "react";
 import { BrokenCirclesLoader } from "react-loaders-kit";
 
-const VideoViewer = ({ fileUrl, videoThumbnail, loading, openModal, closeModal }) => (
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
+const VideoViewer = ({ fileUrl, videoThumbnail, loading, openModal, closeModal, fileExtension }) => (
+
     <div onClick={() => openModal(
         <div className="relative flex justify-center items-center max-w-[80%] h-full mx-auto">
             <button
@@ -11,7 +14,10 @@ const VideoViewer = ({ fileUrl, videoThumbnail, loading, openModal, closeModal }
                 &times;
             </button>
             <video controls className="w-full h-full object-contain">
-                <source src={fileUrl}/>
+                <source
+                    src={`${apiBaseUrl}/file/video?url=${encodeURIComponent(fileUrl)}&extension=${fileExtension}`} // Pass the video URL to the backend
+                    type={fileExtension}
+                />
                 Your browser does not support the video tag.
             </video>
         </div>

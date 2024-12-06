@@ -27,7 +27,7 @@ app.use(cors({
 
 
 app.use((req, res, next) => {
-    if (!req.path.startsWith('/auth')) {
+    if (!req.path.startsWith('/auth') && !req.path.startsWith('/file/video')) {
       return authMiddleware(req, res, next);
     }
     next();

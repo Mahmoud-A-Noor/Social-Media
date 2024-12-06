@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { BrokenCirclesLoader } from "react-loaders-kit";
 import MediaViewerModal from "./MediaViewerModal.jsx";
 import ImageViewer from "./ImageViewer/ImageViewer.jsx";
 import VideoViewer from "./VideoViewer/VideoViewer.jsx";
@@ -72,6 +71,7 @@ const MediaViewer = ({ fileUrl }) => {
                     loading={loading}
                     openModal={openModal}
                     closeModal={closeModal}
+                    fileExtension={`video/${fileExtension}`}
                 />
             );
         }

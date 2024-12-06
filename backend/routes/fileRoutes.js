@@ -17,5 +17,6 @@ const upload = multer(
 router.post('/', upload.single("file"), fileController.uploadFile);
 router.put('/', upload.single('newFile'), fileController.updateFile);
 router.delete('/', fileController.deleteFile);
+router.get('/video', fileController.streamVideo);
 
 module.exports = router;
