@@ -82,8 +82,6 @@ exports.streamVideo = (req, res) => {
         return res.status(400).send('Video URL is required');
     }
 
-    console.log("Fetching video from:", videoUrl); // Log the URL being requested
-
     const range = req.headers.range;
 
     if (!range) {
