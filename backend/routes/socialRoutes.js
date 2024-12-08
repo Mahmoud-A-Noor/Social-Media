@@ -3,18 +3,18 @@ const socialController = require('../controllers/socialController');
 const router = express.Router();
 
 // Route for following a user
-router.post('/:userId/follow', socialController.followUser);
+router.post('/follow', socialController.followUser);
 
 // Route to unfollow a user
-router.delete('/:userId/unfollow', socialController.unfollowUser);
+router.delete('/unfollow', socialController.unfollowUser);
 
 // Route for adding a friend
-router.post('/:userId/add-friend', socialController.addFriend);
+router.post('/add-friend', socialController.addFriend);
 
 // Route to unfriend a user
-router.delete('/:userId/unfriend', socialController.unfriend);
+router.delete('/unfriend', socialController.unfriend);
 
 // Route for blocking a user
-router.post('/:userId/block', socialController.blockUser);
+router.post('/block', socialController.blockUser);
 
 module.exports = router;

@@ -41,6 +41,7 @@ exports.getPosts = async (req, res) => {
 
         // Query to filter posts based on visibility rules and blocked users
         const query = {
+            _id: { $nin: currentUser.hiddenPosts }, // Exclude hidden posts
             author: { $nin: currentUser.blockedUsers }, // Exclude blocked users
             $or: [
                 { visibility: 'public' }, // Public posts
@@ -130,7 +131,59 @@ exports.updatePost = async (req, res) => {
     }
 };
 
+exports.savePost = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { postId } = req.body;
 
+        // Check if the post exists
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        // Find the user and update their savedPosts
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Prevent duplicates
+        if (user.savedPosts.includes(postId)) {
+            return res.status(400).json({ message: 'Post already saved' });
+        }
+
+        user.savedPosts.push(postId);
+        await user.save();
+
+        res.status(200).json({ message: 'Post saved successfully', savedPosts: user.savedPosts });
+    } catch (error) {
+        console.error('Error saving post:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+exports.hidePost = async (req, res) => {
+    try {
+        const { postId } = req.body; // ID of the post to hide
+        const userId = req.user.id; // Authenticated user ID
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Add the post to hiddenPosts if not already hidden
+        if (!user.hiddenPosts.includes(postId)) {
+            user.hiddenPosts.push(postId);
+            await user.save();
+        }
+
+        res.status(200).json({ message: 'Post hidden successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error hiding post', error: error.message });
+    }
+};
 
 exports.createReaction = async (req, res) => {
     const { postId, type } = req.body;

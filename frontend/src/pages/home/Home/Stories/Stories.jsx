@@ -7,7 +7,7 @@ import axiosInstance from "../../../../config/axios.js";
 
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import {GooeyLoader2, JellyBounceLoader} from "react-loaders-kit";
+import {BouncyBallsLoader, GooeyLoader2, JellyBounceLoader} from "react-loaders-kit";
 
 
 
@@ -80,8 +80,8 @@ export default function Stories() {
         <div id="stories" className="h-auto mx-2 mt-5">
             {loading ? (
                 // Show loader while loading
-                <div className="flex justify-center items-center h-64">
-                    <GooeyLoader2 loading={loading} size={100} />
+                <div className="flex items-center justify-center w-full mt-20">
+                    <BouncyBallsLoader loading={true} size={100}/>
                 </div>
             ) : (
                 <Carousel

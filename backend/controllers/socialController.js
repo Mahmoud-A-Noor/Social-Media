@@ -47,6 +47,12 @@ exports.unfollowUser = async (req, res) => {
         const targetUser = await User.findById(userId);
         if (!targetUser) return res.status(404).json({ message: 'User not found' });
 
+        // Check if target user is already unfollowed
+        const isFollowing = currentUser.following.includes(userId);
+        if (!isFollowing) {
+            return res.status(400).json({ message: `You are not following ${targetUser.username}` });
+        }
+
         // Remove the target user from current user’s following list
         currentUser.following = currentUser.following.filter(id => id.toString() !== userId);
 
