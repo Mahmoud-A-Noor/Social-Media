@@ -1,7 +1,7 @@
 import {Flip, toast} from "react-toastify";
 import uploadFile from "../../../../utils/uploadFile.js";
 import axiosInstance from "../../../../config/axios.js";
-import {usePostContext} from "../../../../context/PostContext.jsx";
+import {usePostContext} from "../../../../context/CreatePostContext.jsx";
 import CreatePostFormModal from "./CreatePostFormModal.jsx";
 
 

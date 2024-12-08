@@ -2,10 +2,10 @@ import React, { createContext, useContext, useState, useRef } from 'react';
 import { toast } from 'react-toastify'; // Assuming you're using react-toastify for notifications
 import { Flip } from 'react-toastify';
 
-const PostContext = createContext();
+const CreatePostContext = createContext();
 
 export const usePostContext = () => {
-    return useContext(PostContext);
+    return useContext(CreatePostContext);
 };
 
 export const PostProvider = ({ children }) => {
@@ -86,8 +86,8 @@ export const PostProvider = ({ children }) => {
     };
 
     return (
-        <PostContext.Provider value={value}>
+        <CreatePostContext.Provider value={value}>
             {children}
-        </PostContext.Provider>
+        </CreatePostContext.Provider>
     );
 };

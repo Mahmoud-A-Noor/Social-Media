@@ -2,7 +2,7 @@ import {RiLiveFill} from "react-icons/ri";
 import {FaPhotoVideo} from "react-icons/fa";
 import {IoHappyOutline} from "react-icons/io5";
 import {Angry, Care, Haha, Like, Sad, Wow} from "../../../../constants/facebook-reactions.jsx";
-import {usePostContext} from "../../../../context/PostContext.jsx";
+import {usePostContext} from "../../../../context/CreatePostContext.jsx";
 
 
 export default function PostExtras() {

@@ -4,7 +4,7 @@ import data from "@emoji-mart/data";
 import {FaPhotoVideo} from "react-icons/fa";
 import Modal from "../../../../components/Modal/Modal.jsx";
 import {useEffect} from "react";
-import {usePostContext} from "../../../../context/PostContext.jsx";
+import {usePostContext} from "../../../../context/CreatePostContext.jsx";
 
 
 export default function CreatePostFormModal(){

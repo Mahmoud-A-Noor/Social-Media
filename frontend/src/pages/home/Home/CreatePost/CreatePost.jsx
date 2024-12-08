@@ -2,7 +2,7 @@ import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import CreatePostForm from "./CreatePostForm.jsx";
 import PostExtras from "./PostExtras.jsx";
-import {PostProvider} from "../../../../context/PostContext.jsx";
+import {PostProvider} from "../../../../context/CreatePostContext.jsx";
 
 
 

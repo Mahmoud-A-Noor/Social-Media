@@ -58,15 +58,6 @@ export default function Posts() {
             >
                 {posts.map((post, index) => (
                     <Post key={index} post={post} />
-                    // <div key={post._id} className="post">
-                    //     <p>{post.text}</p>
-                    //     {post.media && post.media.url && (
-                    //         <img src={post.media.url} alt="Post media" />
-                    //     )}
-                    //     <p>Author: {post.author.name}</p>
-                    //     <p>Feeling: {post.feeling}</p>
-                    //     {/* Render other fields like reactions, comments, shares */}
-                    // </div>
                 ))}
             </InfiniteScroll>
         </div>
