@@ -39,32 +39,42 @@ exports.getPosts = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-        // Query to filter posts based on visibility rules and blocked users
+        // Query to filter posts based on visibility, shares, and blocked users
         const query = {
+            $or: [
+                {
+                    visibility: 'public'
+                }, // Public posts
+                {
+                    visibility: 'friends',
+                    author: { $in: currentUser.friends }
+                }, // Friends-only posts
+                {
+                    visibility: 'private',
+                    author: userId
+                }, // User's own private posts
+                {
+                    'shares.user': userId,
+                    'shares.type': { $in: ['public', 'friends'] }
+                } // Posts shared with the current user
+            ],
             _id: { $nin: currentUser.hiddenPosts }, // Exclude hidden posts
             author: { $nin: currentUser.blockedUsers }, // Exclude blocked users
-            $or: [
-                { visibility: 'public' }, // Public posts
-                { visibility: 'friends', author: { $in: currentUser.friends } }, // Friends-only posts
-                { visibility: 'private', author: userId }, // User's own private posts
-            ],
         };
 
-        // Find posts, ensuring no duplicates by applying pagination directly
+        // Find posts with pagination
         const posts = await Post.find(query)
             .sort({ createdAt: -1 }) // Sort by creation date
-            .skip(skip) // Pagination: Skip posts
-            .limit(parseInt(limit)); // Pagination: Limit posts
+            .skip(skip)
+            .limit(parseInt(limit))
+            .populate([
+                { path: 'author', select: 'username profileImage' },
+                { path: 'reactions' },
+                { path: 'comments' },
+                { path: 'shares.user', select: 'username profileImage' }
+            ]);
 
-        // Populate required fields
-        const populatedPosts = await Post.populate(posts, [
-            { path: 'author', select: 'username profileImage' },
-            { path: 'tags', select: 'username' },
-            { path: 'reactions' },
-            { path: 'comments' },
-        ]);
-
-        res.status(200).json(populatedPosts);
+        res.status(200).json(posts);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching posts', error: error.message });
     }
@@ -185,6 +195,37 @@ exports.hidePost = async (req, res) => {
     }
 };
 
+exports.sharePost = async (req, res) => {
+    const { postId, type } = req.body; // `type` can be 'public' or 'friends'
+    const userId = req.user._id;
+
+    try {
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        // Find an existing share by the same user for the same type
+        const existingShare = post.shares.find(
+            (share) => share.user.equals(userId) && share.type === type
+        );
+
+        if (existingShare) {
+            // Update the share date if it already exists
+            existingShare.sharedAt = new Date();
+        } else {
+            // Add a new share entry
+            post.shares.push({ user: userId, type });
+        }
+
+        await post.save();
+
+        res.status(200).json({ message: 'Post shared successfully', post });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 exports.createReaction = async (req, res) => {
     const { postId, type } = req.body;
     const userId = req.user._id
@@ -273,7 +314,6 @@ exports.updateReaction = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
-
 
 exports.createComment = async (req, res) => {
     const { postId, text } = req.body;

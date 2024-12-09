@@ -5,11 +5,14 @@ import {PiMessengerLogo, PiShareFat} from "react-icons/pi";
 import {Flip, toast} from "react-toastify";
 import axiosInstance from "../../../../config/axios.js";
 import {useState} from "react";
+import {MdOutlinePublic} from "react-icons/md";
+import {FaUserFriends} from "react-icons/fa";
 
 export default function PostActions({postId, authorId}) {
 
     const [reaction, setReaction] = useState(null);
     const [isReactionsVisible, setIsReactionsVisible] = useState(false);
+    const [isShareOptionsVisible, setIsShareOptionsVisible] = useState(false);
     const toastConfig = {
         position: "bottom-right",
         autoClose: 5000,
@@ -65,20 +68,32 @@ export default function PostActions({postId, authorId}) {
         }
     }
 
+    const sharePost = async(shareType)=>{
+        setIsShareOptionsVisible(false)
+        try {
+            await axiosInstance.post("/posts/share", {
+                postId: postId,
+                type: shareType,
+            })
+            toast.success("Post shared successfully", toastConfig);
+        }catch (err) {
+            toast.error("Post couldn't be shared, try again..." + err, toastConfig);
+        }
+    }
+
+
 
 
     return (
         <div id="post-bottom-part" className="flex items-center justify-center w-full px-3 mt-1">
-            <div
-                className="relative flex items-center justify-center flex-1 py-1 cursor-pointer hover:bg-gray-100 group"
+            <div className="relative flex items-center justify-center flex-1 py-1 cursor-pointer hover:bg-gray-100 group"
                 onMouseEnter={() => setIsReactionsVisible(true)}
                 onMouseLeave={() => setIsReactionsVisible(false)}>
                 <div className="text-2xl sm:max-md:text-xl xs:max-sm:text-lg w-6 h-6">
                     {reaction ? renderReactionEmoji() : <AiOutlineLike className="text-2xl text-gray-500"/>}
                 </div>
                 <span className="text-base font-semibold text-gray-500 sm:max-md:text-sm xs:max-sm:text-xs ms-2">{reaction ? renderReactionText() : "Like"}</span>
-                <div
-                    className={`absolute -left-3 -top-14 mt-2 transition-opacity delay-500 bg-white border border-gray-300 shadow-lg z-[99999] rounded-full opacity-0 group-hover:opacity-100  ${isReactionsVisible ? "opacity-100 visible" : "opacity-0 invisible"}`}>
+                <div className={`absolute -left-3 -top-14 mt-2 transition-opacity delay-500 bg-white border border-gray-300 shadow-lg z-[99999] rounded-full opacity-0 group-hover:opacity-100  ${isReactionsVisible ? "opacity-100 visible" : "opacity-0 invisible"}`}>
                     <div className="flex px-2 py-1 transition-opacity delay-500 opacity-0 group-hover:opacity-100">
                         <div
                             className="mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8"
@@ -126,9 +141,21 @@ export default function PostActions({postId, authorId}) {
                 <PiMessengerLogo className="text-lg text-gray-500"/>
                 <h5 className="text-sm font-semibold text-gray-500 ms-1">Send</h5>
             </div>
-            <div className="flex items-center justify-center flex-1 py-1 hover:bg-gray-100">
+            <div className="relative flex items-center justify-center flex-1 py-1 hover:bg-gray-100 cursor-pointer group"
+                 onMouseEnter={() => setIsShareOptionsVisible(true)}
+                 onMouseLeave={() => setIsShareOptionsVisible(false)}>
                 <PiShareFat className="text-lg text-gray-500"/>
                 <h5 className="text-sm font-semibold text-gray-500 ms-1">Share</h5>
+                <div className={`absolute left-0 right-0 -top-[6.7rem] mt-2 transition-opacity delay-500 bg-white border border-gray-300 shadow-lg z-[99999] rounded-md opacity-0 group-hover:opacity-100  ${isShareOptionsVisible ? "opacity-100 visible" : "opacity-0 invisible"}`}>
+                    <div className="flex items-center text-base p-3 hover:bg-gray-200" onClick={()=>{sharePost("public")}}>
+                        <MdOutlinePublic/>
+                        <h6 className="ms-2 font-semibold">Public</h6>
+                    </div>
+                    <div className="flex items-center text-base p-3 hover:bg-gray-200" onClick={()=>{sharePost("friends")}}>
+                        <FaUserFriends/>
+                        <h6 className="ms-2 font-semibold">Friends</h6>
+                    </div>
+                </div>
             </div>
         </div>
     )

@@ -22,7 +22,6 @@ export default function Posts() {
         setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId)); // Remove from posts
     };
 
-    // Fetch posts from the backend
     const fetchPosts = async () => {
         try {
             const response = await axiosInstance.get(`/posts?page=${page}&limit=${limit}`);
@@ -30,22 +29,24 @@ export default function Posts() {
 
             // Use functional state update to ensure up-to-date posts
             setPosts((prevPosts) => {
-                const uniquePosts = newPosts.filter(post =>
-                    !prevPosts.some(existingPost => existingPost._id === post._id)
-                ).filter(post => !hiddenPosts.includes(post._id));
+                const filteredPosts = newPosts.filter(post => {
+                    // Allow duplicate posts only if they are shared
+                    const isDuplicate = prevPosts.some(existingPost => existingPost._id === post._id);
+                    return !isDuplicate || post.shares && post.shares.length > 0; // Allow shared posts to appear twice
+                }).filter(post => !hiddenPosts.includes(post._id));
 
-                if (uniquePosts.length < limit) {
-                    setHasMore(false);  // If less than {limit} posts, no more posts available
+                if (filteredPosts.length < limit) {
+                    setHasMore(false); // If less than {limit} posts, no more posts available
                 }
 
-                return [...prevPosts, ...uniquePosts];
+                return [...prevPosts, ...filteredPosts];
             });
 
             setPage(page + 1); // Increment page number for next fetch
         } catch (err) {
             console.error('Error fetching posts:', err);
         }
-        setLoading(false)
+        setLoading(false);
     };
 
     const loader = <div className="flex justify-center items-center h-64">

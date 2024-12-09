@@ -15,7 +15,13 @@ const postSchema = new mongoose.Schema({
   },
   reactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reaction' }],
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
-  shares: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  shares: [
+  {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    type: { type: String, enum: ['public', 'friends'], required: true }, // Share type
+    sharedAt: { type: Date, default: Date.now }
+  }
+],
   createdAt: { type: Date, default: Date.now }
 });
 
