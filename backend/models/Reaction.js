@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const reactionSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['like', 'wow', 'care', 'angry', 'haha', 'love'],
+    enum: ['like', 'wow', 'care', 'angry', 'haha', 'love', 'sad'],
     required: true
   },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

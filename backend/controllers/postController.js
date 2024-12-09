@@ -217,29 +217,28 @@ exports.createReaction = async (req, res) => {
 };
 
 exports.removeReaction = async (req, res) => {
-    const { postId, reactionId } = req.body;
-    const userId = req.user._id
+    const { postId } = req.body;
+    const userId = req.user._id;
+
     try {
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).json({ error: 'Posts not found' });
+            return res.status(404).json({ error: 'Post not found' });
         }
 
-        const reaction = await Reaction.findById(reactionId);
+        const reaction = await Reaction.findOne({ post: postId, user: userId });
         if (!reaction) {
             return res.status(404).json({ error: 'Reaction not found' });
         }
 
-        if (!reaction.user.equals(userId)) {
-            return res.status(403).json({ error: 'Unauthorized action' });
-        }
-
-        post.reactions = post.reactions.filter((r) => r.toString() !== reactionId);
+        // Remove the reaction from the post's reactions
+        post.reactions = post.reactions.filter((r) => !r.equals(reaction._id));
         await post.save();
 
-        await Reaction.deleteOne({ _id: reactionId });
+        // Delete the reaction
+        await Reaction.deleteOne({ _id: reaction._id });
 
-        res.status(200).json({ message: 'Reaction removed' });
+        res.status(200).json({ message: 'Reaction removed successfully' });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -247,18 +246,28 @@ exports.removeReaction = async (req, res) => {
 
 exports.updateReaction = async (req, res) => {
     const { postId, type } = req.body;
-    const userId = req.user._id
+    const userId = req.user._id;
+
     try {
-        // Find the reaction by postId and user ID
-        const reaction = await Reaction.findOne({ post: postId, user: userId });
-        if (!reaction) {
-            return res.status(404).json({ error: 'Reaction not found' });
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
         }
 
-        // Update reaction type
-        reaction.type = type;
+        // Find the reaction by postId and user ID
+        let reaction = await Reaction.findOne({ post: postId, user: userId });
+        if (!reaction) {
+            // If no reaction exists, create a new one
+            reaction = new Reaction({ type, user: userId, post: postId });
+            post.reactions.push(reaction._id);
+            await post.save();
+        } else {
+            // Update the existing reaction's type
+            reaction.type = type;
+        }
+
         await reaction.save();
-        
+
         res.status(200).json({ message: 'Reaction updated successfully', reaction });
     } catch (error) {
         res.status(400).json({ error: error.message });
