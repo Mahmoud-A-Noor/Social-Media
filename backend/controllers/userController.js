@@ -59,30 +59,35 @@ exports.addStory = async (req, res) => {
     }
 };
 
-
 exports.getStories = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { page = 1, limit = 10 } = req.query;
 
-        // Convert the query params to integers
-        const limitStories = parseInt(limit);
-        const skip = (parseInt(page) - 1) * limitStories;
-
-        // Find the user and populate friends and following
+        // Fetch the user and populate friends and following
         const user = await User.findById(userId).populate('friends following', 'username story');
-
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Get the current date (start of the day)
         const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
+        startOfToday.setUTCHours(0, 0, 0, 0);
 
-        // Use a Map to track unique stories by user ID
+        // Initialize a map to ensure unique stories
         const uniqueStoriesMap = new Map();
 
+        // Add the logged-in user's story if it exists and was added today
+        if (
+            user.story?.url &&
+            user.story?.addedAt &&
+            new Date(user.story.addedAt) >= startOfToday
+        ) {
+            uniqueStoriesMap.set(user._id.toString(), {
+                username: user.username,
+                story: user.story,
+            });
+        }
+
+        // Add stories from friends and following
         [...user.friends, ...user.following].forEach(friend => {
             if (
                 friend.story?.url &&
@@ -91,19 +96,17 @@ exports.getStories = async (req, res) => {
             ) {
                 uniqueStoriesMap.set(friend._id.toString(), {
                     username: friend.username,
-                    story: friend.story
+                    story: friend.story,
                 });
             }
         });
 
-        // Convert the Map values to an array and apply pagination
+        // Convert the Map values to an array
         const allStories = Array.from(uniqueStoriesMap.values());
-        const paginatedStories = allStories.slice(skip, skip + limitStories);
 
-        // Respond with paginated stories
-        res.status(200).json(paginatedStories);
+        res.status(200).json(allStories);
     } catch (error) {
-        console.error(error);
+        console.error('Error fetching stories:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };

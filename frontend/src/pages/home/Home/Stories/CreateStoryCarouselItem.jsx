@@ -28,6 +28,9 @@ export default function createStoryCarouselItem() {
             "video/avi",
             "video/mpeg",
             "video/quicktime", // .mov format
+
+            // PDF
+            "application/pdf"
         ];
         if (!validTypes.includes(selectedFile.type)) {
             notify('Invalid file type. Please select an image, video, or document.', "error");

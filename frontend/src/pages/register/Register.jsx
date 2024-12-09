@@ -49,7 +49,7 @@ export default function Register() {
                     <div id="register-actions" className="flex flex-col text-center">
                         <button className="form-button md:bg-none xs:bg-white">Register</button>
                         <span className="mt-1 text-sm w-full md:text-black xs:text-white">Have an account ?
-                            <a className="mt-1 text-[#0f83ff] font-bold" href="/register">register</a>
+                            <a className="mt-1 text-[#0f83ff] font-bold" href="/login">Login</a>
                         </span>
                     </div>
                 </form>

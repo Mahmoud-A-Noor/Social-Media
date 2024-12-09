@@ -18,6 +18,8 @@ export default function Stories() {
     const [limit, setLimit] = useState(4);
     const [loading, setLoading] = useState(true);
 
+    console.log(stories)
+
     // Fetch stories from the backend
     const fetchStories = async () => {
         try {
