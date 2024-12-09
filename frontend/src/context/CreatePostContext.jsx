@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useRef } from 'react';
 import { toast } from 'react-toastify'; // Assuming you're using react-toastify for notifications
 import { Flip } from 'react-toastify';
+import notify from "../utils/notify.js";
 
 const CreatePostContext = createContext();
 
@@ -24,19 +25,6 @@ export const PostProvider = ({ children }) => {
     const emojiPickerButtonRef = useRef(null);
     const textAreaRef = useRef(null);
 
-    // Toast config
-    const toastConfig = {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Flip,
-    };
-
     // File validation and selection function
     const handleFileSelect = (e) => {
         const selectedFile = e.target.files[0];
@@ -53,7 +41,7 @@ export const PostProvider = ({ children }) => {
         ];
 
         if (!validTypes.includes(selectedFile.type)) {
-            toast.error('Invalid file type. Please select an image, video, or document.', toastConfig);
+            notify('Invalid file type. Please select an image, video, or document.', "error");
             return;
         }
 
@@ -81,7 +69,6 @@ export const PostProvider = ({ children }) => {
         emojiPickerRef,
         emojiPickerButtonRef,
         textAreaRef,
-        toastConfig,
         handleFileSelect,
     };
 

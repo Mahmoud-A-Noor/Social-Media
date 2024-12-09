@@ -3,8 +3,8 @@ import {IoIosBookmark, IoMdClose} from "react-icons/io";
 import {BiSolidHide} from "react-icons/bi";
 import {RiUserUnfollowFill} from "react-icons/ri";
 import {useEffect, useRef, useState} from "react";
-import {Flip, toast} from "react-toastify";
 import axiosInstance from "../../../../config/axios.js";
+import notify from "../../../../utils/notify.js";
 
 export default function PostOptions({setIsPostHidden, postId, authorId, hidePostFromList}) {
 
@@ -17,26 +17,14 @@ export default function PostOptions({setIsPostHidden, postId, authorId, hidePost
     const postDropdownRef = useRef(null);
 
 
-    const toastConfig = {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Flip,
-    }
-
     const savePost = async()=>{
         try {
             togglePostDropdown()
             await axiosInstance.post("/posts/save", {postId})
-            toast.success("Posts saved successfully!", toastConfig);
+            notify("Posts saved successfully!", "success");
         }catch (err) {
             togglePostDropdown()
-            toast.error("Post couldn't be saved!" + err, toastConfig);
+            notify("Post couldn't be saved!" + err, "error");
         }
     }
 
@@ -46,13 +34,13 @@ export default function PostOptions({setIsPostHidden, postId, authorId, hidePost
             await axiosInstance.delete("/social/unfollow", {
                 data: { userId: authorId },
             })
-            toast.success("You Unfollowed User successfully!", toastConfig);
+            notify("You Unfollowed User successfully!", "success");
         }catch (err) {
             togglePostDropdown()
             if(err.status === 400){
-                toast.error(err.response.data.message, toastConfig);
+                notify(err.response.data.message, "error");
             }else{
-                toast.error("Failed to unfollowing user. Try again" + err.response.data.message, toastConfig);
+                notify("Failed to unfollowing user. Try again" + err.response.data.message, "error");
             }
         }
     }
@@ -61,10 +49,10 @@ export default function PostOptions({setIsPostHidden, postId, authorId, hidePost
         try {
             const response = await axiosInstance.post("/posts/hide", { postId });
             hidePostFromList(postId)
-            toast.success(response.data.message, toastConfig);
+            notify(response.data.message, "success");
         } catch (error) {
             console.log(error)
-            toast.error("Failed to hide the post. Please try again.", toastConfig);
+            notify("Failed to hide the post. Please try again.", "error");
         }
     };
 

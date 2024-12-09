@@ -4,7 +4,7 @@ import {Sad, Care, Haha, Angry, Love, Wow, Like} from "../../../../constants/fac
 
 import PostOptions from "./PostOptions.jsx";
 import { FaWindowClose } from "react-icons/fa";
-import PostActions from "./PostActions.jsx";
+import PostActions from "./PostActions/PostActions.jsx";
 
 
 export default function Post({post, hidePostFromList}) {

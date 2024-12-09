@@ -1,23 +1,10 @@
 import axiosInstance from "../../../../config/axios.js";
 import uploadFile from "../../../../utils/uploadFile.js";
-
-import {Flip, toast} from "react-toastify";
 import { IoAddOutline } from "react-icons/io5";
+import notify from "../../../../utils/notify.js";
 
 
 export default function createStoryCarouselItem() {
-
-    const toastConfig = {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Flip,
-    }
 
     const handleFileSelect = async (e) => {
         const selectedFile = e.target.files[0];
@@ -43,7 +30,7 @@ export default function createStoryCarouselItem() {
             "video/quicktime", // .mov format
         ];
         if (!validTypes.includes(selectedFile.type)) {
-            toast.error('Invalid file type. Please select an image, video, or document.', toastConfig);
+            notify('Invalid file type. Please select an image, video, or document.', "error");
             return;
         }
 
@@ -52,9 +39,9 @@ export default function createStoryCarouselItem() {
             await axiosInstance.post("/user/story", {
                 storyUrl
             });
-            toast.success("Your story has been added successfully!", );
+            notify("Your story has been added successfully!", "success");
         } catch (error) {
-            toast.error(error, toastConfig);
+            notify(error, "error");
         }
     };
 

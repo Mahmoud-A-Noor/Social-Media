@@ -1,21 +1,21 @@
-import {Flip, toast} from "react-toastify";
 import uploadFile from "../../../../utils/uploadFile.js";
 import axiosInstance from "../../../../config/axios.js";
 import {usePostContext} from "../../../../context/CreatePostContext.jsx";
 import CreatePostFormModal from "./CreatePostFormModal.jsx";
+import notify from "../../../../utils/notify.js";
 
 
 
 export default function CreatePostForm() {
 
-    const {postVisibility, setPostVisibility, postContent, setPostContent, file, setFile, fileUrl, setFileUrl, setIsModalOpen, feeling} = usePostContext()
+    const {postVisibility, setPostVisibility, postContent, setPostContent, file, setFile, fileUrl, setFileUrl, setIsModalOpen, feeling, setFeeling} = usePostContext()
 
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
 
         if (!postContent && !file) {
-            toast.error("Post content or file is required.", toastConfig);
+            notify("Post content or file is required.", "error");
             return;
         }
 
@@ -27,7 +27,7 @@ export default function CreatePostForm() {
                 setFileUrl(uploadedFileUrl); // Save the file URL
             }
         } catch (error) {
-            toast.error(error.message, toastConfig);
+            notify(error.message, "error");
         }
         try {
             // Create the post
@@ -37,11 +37,11 @@ export default function CreatePostForm() {
                 feeling: feeling,
                 postVisibility: postVisibility
             });
-            toast.success("Posts created successfully!", toastConfig);
+            notify("Posts created successfully!", "success");
         } catch (error) {
             setIsModalOpen(false);
             console.error(error)
-            toast.error("Error creating post. Please try again.", toastConfig);
+            notify("Error creating post. Please try again.", "error");
         }
 
         // reset all fields
@@ -52,19 +52,6 @@ export default function CreatePostForm() {
         setFeeling(null)
         setPostVisibility("public")
     };
-
-
-    const toastConfig = {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Flip,
-    }
 
 
 
