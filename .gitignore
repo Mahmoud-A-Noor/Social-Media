@@ -192,5 +192,4 @@ backend/*.tsbuildinfo
 backend/.next/
 backend/out/
 
-
 backend/.env
