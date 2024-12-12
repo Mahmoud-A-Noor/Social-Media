@@ -29,7 +29,8 @@ const Comments = ({ postId, comments, setComments }) => {
             setHasMore(newComments.length === limit);
             setPage((prev) => prev + 1);
         } catch (error) {
-            console.error('Error fetching comments:', error);
+            console.error(error)
+            notify('Error fetching comments', "error");
         }
     };
 
@@ -58,7 +59,8 @@ const Comments = ({ postId, comments, setComments }) => {
                 )
             );
         } catch (error) {
-            console.error('Error fetching replies:', error);
+            console.error(error)
+            notify('Error fetching replies', "error");
         }
     };
 
@@ -130,7 +132,8 @@ const Comments = ({ postId, comments, setComments }) => {
                 console.error('New reply does not have user populated:', newReply);
             }
         } catch (error) {
-            console.error('Error adding reply:', error);
+            console.error(error)
+            notify('Error adding reply', "error");
         }
     };
 
@@ -147,16 +150,16 @@ const Comments = ({ postId, comments, setComments }) => {
                     <div key={comment._id} style={{ marginBottom: '20px', borderBottom: '1px solid #ccc' }}>
                         <div className="flex items-start justify-start">
                             <img className="rounded-full size-12 me-2" src="/src/assets/person.png" alt=""/>
-                            <div className="bg-gray-200 flex-1 shadow rounded p-4 mb-4">
+                            <div className="flex-1 p-4 mb-4 bg-gray-200 rounded shadow">
                                 {/* Comment Text */}
-                                <p className="text-gray-800 font-semibold">{comment.user.username}</p>
+                                <p className="font-semibold text-gray-800">{comment.user.username}</p>
                                 <p className="text-gray-600">{comment.text}</p>
 
                                 {/* Show Replies Button */}
                                 {comment.replies?.length > 0 && (
                                     <button
                                         onClick={() => handleReplyToggle(comment._id)}
-                                        className="text-blue-500 text-sm hover:underline mt-2"
+                                        className="mt-2 text-sm text-blue-500 hover:underline"
                                     >
                                         {comment.showReplies
                                             ? 'Hide Replies'
@@ -167,7 +170,7 @@ const Comments = ({ postId, comments, setComments }) => {
                                 {/* Reply Button */}
                                 <button
                                     onClick={() => toggleReplyInput(comment._id)}
-                                    className="text-gray-600 text-sm hover:text-gray-800 hover:underline mt-2 ml-4"
+                                    className="mt-2 ml-4 text-sm text-gray-600 hover:text-gray-800 hover:underline"
                                 >
                                     Reply
                                 </button>
@@ -195,7 +198,7 @@ const Comments = ({ postId, comments, setComments }) => {
                                 {comment.showReplies && (
                                     <div className="mt-2 ml-4">
                                         {comment.replies?.map((reply) => (
-                                            <div key={`${comment._id}-reply-${reply._id}`} className="border-l pl-4 text-gray-700">
+                                            <div key={`${comment._id}-reply-${reply._id}`} className="pl-4 text-gray-700 border-l">
                                                 <p className="text-sm">
                                                     <strong>{reply.user.username}:</strong> {reply.text}
                                                 </p>
@@ -204,7 +207,7 @@ const Comments = ({ postId, comments, setComments }) => {
                                         {comment.hasMoreReplies && (
                                             <button
                                                 onClick={() => fetchReplies(comment._id, comment.replyPage || 1)}
-                                                className="text-blue-500 text-sm hover:underline"
+                                                className="text-sm text-blue-500 hover:underline"
                                             >
                                                 Load more replies
                                             </button>
