@@ -68,20 +68,25 @@ export default function CommentInput({postId, setComments}) {
         e.preventDefault();
 
         try {
-            // Create the post
             const response = await axiosInstance.post("/posts/comments", {
                 text: comment,
                 postId: postId
-            })
-            const newComment = response.data.comment;
-            setComments((prev) => [newComment, ...prev]);
-            setComment("")
-            notify("Comment added successfully!", "success");
+            });
+            const newComment = response.data.reply;
+
+            // Only add the comment if it has the user field populated
+            if (newComment && newComment.user) {
+                setComments((prev) => [newComment, ...prev]);
+                setComment("");
+                notify("Comment added successfully!", "success");
+            } else {
+                console.error('New comment does not have user populated:', newComment);
+            }
         } catch (error) {
-            console.error(error)
+            console.error(error);
             notify("An error occurred during adding the comment. Please try again.", "error");
         }
-    }
+    };
 
     const emojiPickerPortal = isEmojiPickerOpen
         ? ReactDOM.createPortal(
@@ -100,10 +105,10 @@ export default function CommentInput({postId, setComments}) {
         : null;
 
     return (
-        <form className="sticky bottom-0 left-0 right-0 z-30 bg-white px-5 mb-3" onSubmit={handleFormSubmit}>
+        <form className="sticky bottom-0 left-0 right-0 z-30 px-5 mb-3 bg-white" onSubmit={handleFormSubmit}>
             <div className="flex items-center justify-center">
                 <textarea
-                    className="border-1 resize-none focus:outline-0 w-full my-3 text-xl rounded-lg bg-gray-200 px-2 py-3"
+                    className="w-full px-2 py-3 my-3 text-xl bg-gray-200 rounded-lg resize-none border-1 focus:outline-0"
                     placeholder="write a comment..."
                     ref={textAreaRef}
                     style={{maxHeight: "300px"}}
@@ -118,11 +123,11 @@ export default function CommentInput({postId, setComments}) {
                     className="ms-2 w-fit"
                 >
                     <IoHappyOutline
-                        className="text-5xl sm:max-md:text-xl xs:max-sm:text-lg rounded-full p-2 cursor-pointer hover:bg-gray-100"/>
+                        className="p-2 text-5xl rounded-full cursor-pointer sm:max-md:text-xl xs:max-sm:text-lg hover:bg-gray-100"/>
                 </div>
             </div>
             <div id="login-actions" className="flex flex-col text-center">
-                <button className="group form-button md:bg-none xs:bg-white mt-0" type={"submit"}>Comment</button>
+                <button className="mt-0 group form-button md:bg-none xs:bg-white" type={"submit"}>Comment</button>
             </div>
             {emojiPickerPortal}
         </form>
