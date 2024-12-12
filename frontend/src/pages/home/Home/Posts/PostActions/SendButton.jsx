@@ -2,7 +2,7 @@ import {PiMessengerLogo} from "react-icons/pi";
 
 
 
-export default function Send(){
+export default function SendButton(){
 
 
 

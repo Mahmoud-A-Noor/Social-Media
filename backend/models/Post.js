@@ -18,7 +18,7 @@ const postSchema = new mongoose.Schema({
   shares: [
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    type: { type: String, enum: ['public', 'friends'], required: true }, // Share type
+    type: { type: String, enum: ['public', 'friends'], required: true }, // ShareButton type
     sharedAt: { type: Date, default: Date.now }
   }
 ],

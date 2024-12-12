@@ -1,12 +1,12 @@
 import {PiShareFat} from "react-icons/pi";
 import {MdOutlinePublic} from "react-icons/md";
 import {FaUserFriends} from "react-icons/fa";
-import React from "./React.jsx";
+import ReactButton from "./ReactButton.jsx";
 import axiosInstance from "../../../../../config/axios.js";
 import {useState} from "react";
 import notify from "../../../../../utils/notify.js";
 
-export default function Share({postId}){
+export default function ShareButton({postId}){
 
     const [isShareOptionsVisible, setIsShareOptionsVisible] = useState(false);
 

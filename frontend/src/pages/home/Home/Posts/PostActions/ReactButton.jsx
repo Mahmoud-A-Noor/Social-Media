@@ -4,7 +4,7 @@ import axiosInstance from "../../../../../config/axios.js";
 import {useState} from "react";
 import notify from "../../../../../utils/notify.js";
 
-export default function React({postId}){
+export default function ReactButton({postId}){
 
     const [reaction, setReaction] = useState(null);
     const [isReactionsVisible, setIsReactionsVisible] = useState(false);

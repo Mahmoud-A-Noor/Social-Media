@@ -20,6 +20,8 @@ router.put('/reactions', postController.updateReaction);
 
 // Routes for comment actions
 router.post('/comments', postController.createComment);      // Add a comment
+router.get('/comments', postController.getComments);
+router.get('/comments/replies', postController.getReplies);
 router.delete('/comments', postController.deleteComment); // Remove a comment
 router.put('/comments', postController.updateComment);
 

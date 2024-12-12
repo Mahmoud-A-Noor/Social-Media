@@ -7,7 +7,7 @@ import axiosInstance from "../../../../config/axios.js";
 
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import {BouncyBallsLoader, GooeyLoader2, JellyBounceLoader} from "react-loaders-kit";
+import {BouncyBallsLoader} from "react-loaders-kit";
 
 
 
@@ -17,8 +17,6 @@ export default function Stories() {
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(4);
     const [loading, setLoading] = useState(true);
-
-    console.log(stories)
 
     // Fetch stories from the backend
     const fetchStories = async () => {

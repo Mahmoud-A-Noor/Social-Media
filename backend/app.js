@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(passport.initialize());
 
 app.use(cors({
-    origin: 'http://localhost:5173', // Allow requests from the frontend (React app)
+    origin: 'http://localhost:5173', // Allow requests from the frontend (ReactButton app)
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'], // You can add any specific headers you need
 }));

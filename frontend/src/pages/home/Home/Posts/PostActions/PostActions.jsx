@@ -1,19 +1,18 @@
-import {GoComment} from "react-icons/go";
-import {PiMessengerLogo, PiShareFat} from "react-icons/pi";
-import React from "./React.jsx"
-import Share from "./Share.jsx";
-import Comment from "./Comment.jsx";
-import Send from "./Send.jsx";
+import ReactButton from "./ReactButton.jsx"
+import ShareButton from "./ShareButton.jsx";
+import CommentButton from "./Comment/CommentButton.jsx";
+import SendButton from "./SendButton.jsx";
+import {useState} from "react";
 
 export default function PostActions({postId, authorId}) {
 
+
     return (
         <div id="post-bottom-part" className="flex items-center justify-center w-full px-3 mt-1">
-
-            <React postId={postId} />
-            <Comment postId={postId} />
-            <Send />
-            <Share postId={postId} />
+            <ReactButton postId={postId} />
+            <CommentButton postId={postId} />
+            <SendButton />
+            <ShareButton postId={postId} />
         </div>
     )
 }

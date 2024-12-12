@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useState, useRef } from 'react';
-import { toast } from 'react-toastify'; // Assuming you're using react-toastify for notifications
-import { Flip } from 'react-toastify';
 import notify from "../utils/notify.js";
 
 const CreatePostContext = createContext();

@@ -24,7 +24,7 @@ exports.getMyData = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Send user data as response
+        // SendButton user data as response
         res.status(200).json(user);
     } catch (error) {
         console.error(error);

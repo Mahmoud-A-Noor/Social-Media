@@ -316,67 +316,111 @@ exports.updateReaction = async (req, res) => {
 };
 
 exports.createComment = async (req, res) => {
-    const { postId, text } = req.body;
+    const { postId, text, parentId } = req.body; // parentId for replies
     const userId = req.user._id;
-    const io = getIoInstance()
+    const io = getIoInstance();
 
     try {
-      const comment = await Comment.create({
-        text,
-        user: userId,
-        post: postId
-      });
-  
-      const post = await Post.findById(postId);
-      post.comments.push(comment._id);
-      await post.save();
+        const comment = await Comment.create({
+            text,
+            user: userId,
+            post: postId,
+            parent: parentId || null,
+        });
 
-        if (post.author._id.toString() !== userId.toString()) {
-            const notification = await Notification.create({
-                user: post.author._id, // Recipient
-                actorId: userId, // Triggering user
-                postId: postId, // Related post
-                actionType: 'comment',
-                message: `${req.user.username} commented on your post.`
-            });
+        // Populate the user field for the comment
+        const populatedComment = await Comment.findById(comment._id).populate('user', 'username');
 
-            // Emit notification
-            io.to(post.author._id.toString()).emit('notification', {
-                notification,
-                actor: req.user // Send triggering user's details
-            });
+        if (!parentId) {
+            const post = await Post.findById(postId);
+            post.comments.push(populatedComment._id);
+            await post.save();
         }
 
-      res.status(201).json({ message: 'Comment added', comment });
+        if (!parentId) {
+            const post = await Post.findById(postId);
+            if (post.author._id.toString() !== userId.toString()) {
+                const notification = await Notification.create({
+                    user: post.author._id,
+                    actorId: userId,
+                    postId: postId,
+                    actionType: 'comment',
+                    message: `${req.user.username} commented on your post.`,
+                });
+
+                io.to(post.author._id.toString()).emit('notification', {
+                    notification,
+                    actor: req.user,
+                });
+            }
+        }
+
+        // Send the populated comment as the response
+        res.status(201).json({ message: 'Comment added', reply: populatedComment });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+        res.status(400).json({ error: error.message });
+    }
+};
+
+exports.getComments = async (req, res) => {
+    const { postId, page = 1, limit = 10 } = req.query; // Pagination params
+    try {
+        // Fetching comments for the post
+        const comments = await Comment.find({ post: postId, parent: null })
+            .populate('user', 'username') // Populate the user field
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
+
+        // Fetching replies for each comment
+        const commentsWithReplies = await Promise.all(comments.map(async (comment) => {
+            const replies = await Comment.find({ parent: comment._id })
+                .populate('user', 'username')
+                .sort({ createdAt: -1 })
+                .limit(5); // Limit the number of replies
+            return { ...comment.toObject(), replies };
+        }));
+
+        res.status(200).json({ comments: commentsWithReplies });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+exports.getReplies = async (req, res) => {
+    const { commentId, page = 1, limit = 5 } = req.query; // Pagination for replies
+    try {
+        // Fetching replies based on parentId
+        const replies = await Comment.find({ parent: commentId })
+            .populate('user', 'username')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
+
+        res.status(200).json({ replies });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };
 
 exports.deleteComment = async (req, res) => {
-    const { postId, commentId } = req.body;
-    const userId = req.user._id
-    try {
-        const post = await Post.findById(postId);
-        if (!post) {
-            return res.status(404).json({ error: 'Posts not found' });
-        }
+    const { commentId } = req.body;
+    const userId = req.user._id;
 
+    try {
         const comment = await Comment.findById(commentId);
         if (!comment) {
-            return res.status(404).json({ error: 'Comment not found' });
+            return res.status(404).json({ error: 'CommentButton not found' });
         }
 
-        if (!comment.user.equals(userId) && !post.author.equals(userId)) {
+        if (!comment.user.equals(userId)) {
             return res.status(403).json({ error: 'Unauthorized action' });
         }
 
-        post.comments = post.comments.filter((c) => c.toString() !== commentId);
-        await post.save();
-
         await Comment.deleteOne({ _id: commentId });
+        await Comment.deleteMany({ parent: commentId }); // Delete replies
 
-        res.status(200).json({ message: 'Comment deleted' });
+        res.status(200).json({ message: 'CommentButton deleted' });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -384,21 +428,21 @@ exports.deleteComment = async (req, res) => {
 
 exports.updateComment = async (req, res) => {
     const { commentId, text } = req.body;
-    const userId = req.user._id
+    const userId = req.user._id;
+
     try {
         const comment = await Comment.findById(commentId);
         if (!comment) {
-            return res.status(404).json({ error: 'Comment not found' });
+            return res.status(404).json({ error: 'CommentButton not found' });
         }
         if (!comment.user.equals(userId)) {
             return res.status(403).json({ error: 'Unauthorized action' });
         }
-        
-        // Update comment text
+
         comment.text = text;
         await comment.save();
-        
-        res.status(200).json({ message: 'Comment updated successfully', comment });
+
+        res.status(200).json({ message: 'CommentButton updated successfully', comment });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
