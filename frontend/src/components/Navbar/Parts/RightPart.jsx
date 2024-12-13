@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-
 import useThemeSwitcher from "../../../hooks/useThemeSwitcher";
+import NotificationsDropdown from './NotificationsDropdown';
 
 import { PiSquaresFourFill } from "react-icons/pi";
 import { BiSolidBellRing } from "react-icons/bi";
@@ -19,54 +19,67 @@ import { MdFeedback } from "react-icons/md";
 import { GiEntryDoor } from "react-icons/gi";
 import { IoIosArrowForward } from "react-icons/io";
 
-
 export default function RightPart() {
-
     const [isImageDropdownOpen, setIsImageDropdownOpen] = useState(false)
     const [isNavMenuDropdownOpen, setIsNavMenuDropdownOpen] = useState(false)
-    const toggleImageDropdown = (e) => {
-        e.stopPropagation(); // Prevent the outside click event from firing
-        setIsImageDropdownOpen((prev)=>!prev);
-      };
-    const toggleNavMenuDropdown = (e) => {
-        e.stopPropagation(); // Prevent the outside click event from firing
-        setIsNavMenuDropdownOpen((prev)=>!prev);
-      };
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
     const [theme, toggleTheme] = useThemeSwitcher()
+
     const imageDropdownButtonRef = useRef(null);
     const imageDropdownRef = useRef(null);
     const navMenuDropdownButtonRef = useRef(null);
     const navMenuDropdownRef = useRef(null);
-    
+    const notificationsButtonRef = useRef(null);
+    const notificationsDropdownRef = useRef(null);
+
+    const toggleImageDropdown = (e) => {
+        e.stopPropagation();
+        setIsImageDropdownOpen((prev) => !prev);
+    };
+
+    const toggleNavMenuDropdown = (e) => {
+        e.stopPropagation();
+        setIsNavMenuDropdownOpen((prev) => !prev);
+    };
+
+    const toggleNotifications = (e) => {
+        e.stopPropagation();
+        setIsNotificationsOpen(prev => !prev);
+    };
+
     useEffect(() => {
         const handleClickOutside = (event) => {
-          // Close the dropdown if the click is outside both the dropdown and button
-          if (
-            imageDropdownRef.current &&
-            !imageDropdownRef.current.contains(event.target) &&
-            imageDropdownButtonRef.current &&
-            !imageDropdownButtonRef.current.contains(event.target)
-          ) {
-            setIsImageDropdownOpen(false);
-          }
-          if (
-            navMenuDropdownRef.current &&
-            !navMenuDropdownRef.current.contains(event.target) &&
-            navMenuDropdownButtonRef.current &&
-            !navMenuDropdownButtonRef.current.contains(event.target)
-          ) {
-            setIsNavMenuDropdownOpen(false);
-          }
+            if (
+                imageDropdownRef.current &&
+                !imageDropdownRef.current.contains(event.target) &&
+                imageDropdownButtonRef.current &&
+                !imageDropdownButtonRef.current.contains(event.target)
+            ) {
+                setIsImageDropdownOpen(false);
+            }
+            if (
+                navMenuDropdownRef.current &&
+                !navMenuDropdownRef.current.contains(event.target) &&
+                navMenuDropdownButtonRef.current &&
+                !navMenuDropdownButtonRef.current.contains(event.target)
+            ) {
+                setIsNavMenuDropdownOpen(false);
+            }
+            if (
+                notificationsDropdownRef.current &&
+                !notificationsDropdownRef.current.contains(event.target) &&
+                notificationsButtonRef.current &&
+                !notificationsButtonRef.current.contains(event.target)
+            ) {
+                setIsNotificationsOpen(false);
+            }
         };
-    
-        // Bind the event listener for detecting outside clicks
+
         document.addEventListener('mousedown', handleClickOutside);
-        
-        // Cleanup the event listener on unmount
         return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
-      }, []);
+    }, []);
 
     return (
         <div className="flex items-center justify-center">
@@ -132,12 +145,23 @@ export default function RightPart() {
                     </div>
                 </div>
             }
-            <div className="p-2 mx-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300">
-                <BiSolidBellRing className="text-xl" />
+
+            <div className="relative">
+                <div
+                    ref={notificationsButtonRef}
+                    className="p-2 mx-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
+                    onClick={toggleNotifications}
+                >
+                    <BiSolidBellRing className="text-xl" />
+                </div>
+                <div ref={notificationsDropdownRef}>
+                    <NotificationsDropdown isOpen={isNotificationsOpen} />
+                </div>
             </div>
+
             <div className="relative mx-2 size-9">
                 <img ref={imageDropdownButtonRef} src="/src/assets/person.png" alt="no image" className="w-full h-full rounded-full cursor-pointer" onClick={toggleImageDropdown} />
-                {isImageDropdownOpen && 
+                {isImageDropdownOpen &&
                     <div ref={imageDropdownRef} className="absolute w-[23em] h-[26.5em] top-[2.5em] -left-[20.5em] shadow-[0px_0px_5px_0.1px_rgba(0,_0,_0,_0.75)] bg-white p-3 divide-y divide-gray-300 rounded-md z-[99999]">
                         <div className="flex items-center w-full p-2 mt-2 mb-4 border border-gray-400 rounded-lg cursor-pointer hover:bg-gray-200">
                             <img src="/src/assets/person.png" alt="no image" className="rounded-full size-9 me-2" />

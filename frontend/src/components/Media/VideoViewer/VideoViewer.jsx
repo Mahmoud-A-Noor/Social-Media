@@ -1,35 +1,79 @@
 import React from "react";
 import { BrokenCirclesLoader } from "react-loaders-kit";
+import { FaPlay } from "react-icons/fa"; // Import play icon
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-const VideoViewer = ({ fileUrl, videoThumbnail, loading, openModal, closeModal, fileExtension }) => (
+const VideoViewer = ({
+  fileUrl,
+  videoThumbnail,
+  loading,
+  openModal,
+  closeModal,
+}) => {
+  const handleClick = () => {
+    openModal(
+      <div className="relative flex items-center justify-center w-full h-full">
+        <button
+          onClick={closeModal}
+          className="absolute right-2 top-2 z-[9999999999] text-4xl font-bold text-red-700"
+        >
+          &times;
+        </button>
+        <video
+          controls
+          autoPlay
+          className="w-full h-full object-fit" // Add ability to save current time
+          onTimeUpdate={(e) => {
+            // Save current time to localStorage
+            localStorage.setItem(`video-${fileUrl}`, e.target.currentTime);
+          }}
+          // Load saved time when video loads
+          onLoadedMetadata={(e) => {
+            const savedTime = localStorage.getItem(`video-${fileUrl}`);
+            if (savedTime) {
+              e.target.currentTime = parseFloat(savedTime);
+            }
+          }}
+        >
+          <source
+            src={`${apiBaseUrl}/file/video?url=${encodeURIComponent(fileUrl)}`}
+            type={`video/${fileUrl.split(".").pop().toLowerCase()}`}
+          />
+          Your browser does not support the video tag.
+        </video>
+      </div>,
+    );
+  };
 
-    <div onClick={() => openModal(
-        <div className="relative flex justify-center items-center max-w-[80%] h-full mx-auto">
-            <button
-                onClick={closeModal}
-                className="absolute top-2 right-2 text-red-700 text-4xl font-bold z-[9999999999]"
-            >
-                &times;
-            </button>
-            <video controls className="w-full h-full object-contain">
-                <source
-                    src={`${apiBaseUrl}/file/video?url=${encodeURIComponent(fileUrl)}&extension=${fileExtension}`} // Pass the video URL to the backend
-                    type={fileExtension}
-                />
-                Your browser does not support the video tag.
-            </video>
+  return (
+    <div className="relative w-full h-full cursor-pointer group" onClick={handleClick}>
+      {loading ? (
+        <div className="flex items-center justify-center w-full h-full">
+          <BrokenCirclesLoader size={50} color="#ff0000" loading={true} />
         </div>
-    )} className="w-full h-full">
-        {loading ? (
-            <div className="flex justify-center items-center w-full h-full">
-                <BrokenCirclesLoader size={50} color="#ff0000" loading={true} />
+      ) : (
+        <>
+          {/* Video thumbnail */}
+          <img
+            src={videoThumbnail}
+            alt="Video thumbnail"
+            className="object-cover w-full h-full cursor-pointer"
+          />
+
+          {/* Play button overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="p-4 transition-transform duration-200 transform bg-black bg-opacity-50 rounded-full group-hover:scale-110">
+              <FaPlay
+                className="text-3xl text-white"
+                style={{ marginLeft: "4px" }} // Slight adjustment to center the play icon
+              />
             </div>
-        ) : (
-            <img src={videoThumbnail} alt="Video Thumbnail" className="w-full h-full object-cover cursor-pointer"/>
-        )}
+          </div>
+        </>
+      )}
     </div>
-);
+  );
+};
 
 export default VideoViewer;

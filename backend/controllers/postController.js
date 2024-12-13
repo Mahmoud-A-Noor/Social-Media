@@ -6,6 +6,7 @@ const Notification = require('../models/Notification');
 
 const { getIoInstance } = require('../config/socket');
 const cloudinary = require("../config/cloudinary");
+const { createNotification } = require('../utils/notificationHelper');
 
 
 
@@ -27,56 +28,50 @@ exports.createPost = async (req, res) => {
 };
 
 exports.getPosts = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const currentUserId = req.user._id;
+
     try {
-        const userId = req.user.id; // Current user's ID
-        const { page = 1, limit = 10 } = req.query;
+        const posts = await Post.find()
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .populate({
+                path: 'author',
+                select: 'username profileImage followers'
+            })
+            .populate('reactions')
+            .populate('comments')
+            .populate({
+                path: 'shares',
+                populate: {
+                    path: 'user',
+                    select: 'username profileImage'
+                }
+            })
+            .lean(); // Convert to plain JavaScript object for modification
 
-        const currentUser = await User.findById(userId);
+        // Add isFollowing field to each post's author
+        const postsWithFollowStatus = posts.map(post => ({
+            ...post,
+            author: {
+                ...post.author,
+                isFollowing: post.author.followers.some(
+                    followerId => followerId.toString() === currentUserId.toString()
+                )
+            }
+        }));
 
-        if (!currentUser) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+        // Remove the followers array as it's no longer needed in the response
+        postsWithFollowStatus.forEach(post => {
+            delete post.author.followers;
+        });
 
-        const skip = (page - 1) * limit;
-
-        // Query to filter posts based on visibility, shares, and blocked users
-        const query = {
-            $or: [
-                {
-                    visibility: 'public'
-                }, // Public posts
-                {
-                    visibility: 'friends',
-                    author: { $in: currentUser.friends }
-                }, // Friends-only posts
-                {
-                    visibility: 'private',
-                    author: userId
-                }, // User's own private posts
-                {
-                    'shares.user': userId,
-                    'shares.type': { $in: ['public', 'friends'] }
-                } // Posts shared with the current user
-            ],
-            _id: { $nin: currentUser.hiddenPosts }, // Exclude hidden posts
-            author: { $nin: currentUser.blockedUsers }, // Exclude blocked users
-        };
-
-        // Find posts with pagination
-        const posts = await Post.find(query)
-            .sort({ createdAt: -1 }) // Sort by creation date
-            .skip(skip)
-            .limit(parseInt(limit))
-            .populate([
-                { path: 'author', select: 'username profileImage' },
-                { path: 'reactions' },
-                { path: 'comments' },
-                { path: 'shares.user', select: 'username profileImage' }
-            ]);
-
-        res.status(200).json(posts);
+        res.json(postsWithFollowStatus);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching posts', error: error.message });
+        console.error('Error fetching posts:', error);
+        res.status(500).json({ error: 'Error fetching posts' });
     }
 };
 
@@ -196,7 +191,7 @@ exports.hidePost = async (req, res) => {
 };
 
 exports.sharePost = async (req, res) => {
-    const { postId, type } = req.body; // `type` can be 'public' or 'friends'
+    const { postId, type = 'public' } = req.body;
     const userId = req.user._id;
 
     try {
@@ -205,53 +200,96 @@ exports.sharePost = async (req, res) => {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        // Find an existing share by the same user for the same type
-        const existingShare = post.shares.find(
-            (share) => share.user.equals(userId) && share.type === type
-        );
-
-        if (existingShare) {
-            // Update the share date if it already exists
-            existingShare.sharedAt = new Date();
-        } else {
-            // Add a new share entry
-            post.shares.push({ user: userId, type });
-        }
-
+        // Add share to post
+        post.shares.push({
+            user: userId,
+            type,
+            sharedAt: new Date()
+        });
         await post.save();
 
-        res.status(200).json({ message: 'Post shared successfully', post });
+        // Create notification if the share is not by the post author
+        if (post.author.toString() !== userId.toString()) {
+            await createNotification({
+                userId: post.author,
+                actorId: userId,
+                postId,
+                actionType: 'share',
+                message: `${req.user.username} shared your post`
+            });
+        }
+
+        res.status(200).json({ message: 'Post shared successfully' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 };
 
 exports.createReaction = async (req, res) => {
     const { postId, type } = req.body;
-    const userId = req.user._id
-    const io = getIoInstance()
+    const userId = req.user._id;
+
     try {
-        const reaction = await Reaction.create({ type, user: userId, post: postId });
         const post = await Post.findById(postId);
-        post.reactions.push(reaction);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        // Check if user already reacted
+        const existingReaction = await Reaction.findOne({
+            post: postId,
+            user: userId
+        });
+
+        if (existingReaction) {
+            return res.status(400).json({ error: 'User already reacted to this post' });
+        }
+
+        // Create new reaction
+        const reaction = await Reaction.create({
+            type,
+            user: userId,
+            post: postId
+        });
+
+        // Add reaction to post
+        post.reactions.push(reaction._id);
         await post.save();
 
-        if (post.author._id.toString() !== userId.toString()) {
-            const notification = await Notification.create({
-                user: post.author._id,
+        // Create notification if the reaction is not by the post author
+        if (post.author.toString() !== userId.toString()) {
+            await createNotification({
+                userId: post.author,
                 actorId: userId,
-                postId: postId,
+                postId,
                 actionType: 'reaction',
-                message: `${req.user.username} reacted to your post.`
-            });
-
-            io.to(post.author._id.toString()).emit('notification', {
-                notification,
-                actor: req.user
+                message: `${req.user.username} reacted to your post`
             });
         }
 
-        res.status(200).json({ message: 'Reaction added', reaction });
+        res.status(201).json(reaction);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+exports.updateReaction = async (req, res) => {
+    const { postId, type } = req.body;
+    const userId = req.user._id;
+
+    try {
+        // Find and update the reaction
+        const reaction = await Reaction.findOneAndUpdate(
+            { post: postId, user: userId },
+            { type },
+            { new: true }
+        );
+
+        if (!reaction) {
+            return res.status(404).json({ error: 'Reaction not found' });
+        }
+
+        res.status(200).json(reaction);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -267,17 +305,21 @@ exports.removeReaction = async (req, res) => {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        const reaction = await Reaction.findOne({ post: postId, user: userId });
+        // Find and remove the reaction
+        const reaction = await Reaction.findOneAndDelete({
+            post: postId,
+            user: userId
+        });
+
         if (!reaction) {
             return res.status(404).json({ error: 'Reaction not found' });
         }
 
-        // Remove the reaction from the post's reactions
-        post.reactions = post.reactions.filter((r) => !r.equals(reaction._id));
+        // Remove reaction from post
+        post.reactions = post.reactions.filter(
+            reactionId => reactionId.toString() !== reaction._id.toString()
+        );
         await post.save();
-
-        // Delete the reaction
-        await Reaction.deleteOne({ _id: reaction._id });
 
         res.status(200).json({ message: 'Reaction removed successfully' });
     } catch (error) {
@@ -285,8 +327,8 @@ exports.removeReaction = async (req, res) => {
     }
 };
 
-exports.updateReaction = async (req, res) => {
-    const { postId, type } = req.body;
+exports.createComment = async (req, res) => {
+    const { postId, text, parentId } = req.body;
     const userId = req.user._id;
 
     try {
@@ -295,69 +337,58 @@ exports.updateReaction = async (req, res) => {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        // Find the reaction by postId and user ID
-        let reaction = await Reaction.findOne({ post: postId, user: userId });
-        if (!reaction) {
-            // If no reaction exists, create a new one
-            reaction = new Reaction({ type, user: userId, post: postId });
-            post.reactions.push(reaction._id);
-            await post.save();
-        } else {
-            // Update the existing reaction's type
-            reaction.type = type;
-        }
-
-        await reaction.save();
-
-        res.status(200).json({ message: 'Reaction updated successfully', reaction });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
-
-exports.createComment = async (req, res) => {
-    const { postId, text, parentId } = req.body; // parentId for replies
-    const userId = req.user._id;
-    const io = getIoInstance();
-
-    try {
-        const comment = await Comment.create({
+        // Create the comment
+        const newComment = await Comment.create({
             text,
             user: userId,
             post: postId,
             parent: parentId || null,
         });
 
-        // Populate the user field for the comment
-        const populatedComment = await Comment.findById(comment._id).populate('user', 'username');
+        // Explicitly populate the user field
+        const populatedComment = await Comment.findById(newComment._id)
+            .populate({
+                path: 'user',
+                select: 'username profileImage'
+            })
+            .lean();
+        
 
         if (!parentId) {
-            const post = await Post.findById(postId);
-            post.comments.push(populatedComment._id);
+            post.comments.push(newComment._id);
             await post.save();
-        }
 
-        if (!parentId) {
-            const post = await Post.findById(postId);
-            if (post.author._id.toString() !== userId.toString()) {
-                const notification = await Notification.create({
-                    user: post.author._id,
+            if (post.author.toString() !== userId.toString()) {
+                await createNotification({
+                    userId: post.author,
                     actorId: userId,
                     postId: postId,
                     actionType: 'comment',
-                    message: `${req.user.username} commented on your post.`,
+                    message: `${req.user.username} commented on your post`
                 });
+            }
+        } else {
+            const parentComment = await Comment.findById(parentId)
+                .populate('user', 'username');
 
-                io.to(post.author._id.toString()).emit('notification', {
-                    notification,
-                    actor: req.user,
+            if (parentComment && parentComment.user._id.toString() !== userId.toString()) {
+                await createNotification({
+                    userId: parentComment.user._id,
+                    actorId: userId,
+                    postId: postId,
+                    actionType: 'comment',
+                    message: `${req.user.username} replied to your comment`
                 });
             }
         }
 
-        // Send the populated comment as the response
-        res.status(201).json({ message: 'Comment added', reply: populatedComment });
+        // Send response with populated comment
+        const response = { reply: populatedComment };
+        
+        res.status(201).json(response);
+
     } catch (error) {
+        console.error('Error in createComment:', error);
         res.status(400).json({ error: error.message });
     }
 };

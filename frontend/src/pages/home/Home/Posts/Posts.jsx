@@ -49,9 +49,35 @@ export default function Posts() {
         setLoading(false);
     };
 
-    const loader = <div className="flex justify-center items-center h-64">
+    const loader = <div className="flex items-center justify-center h-64">
             <GooeyLoader2 loading={loading} size={100} />
         </div>
+
+    const updatePostReactions = (postId, newReaction, isRemove = false) => {
+        setPosts(prevPosts => prevPosts.map(post => {
+            if (post._id === postId) {
+                if (isRemove) {
+                    // Remove the reaction
+                    return {
+                        ...post,
+                        reactions: post.reactions.filter(reaction => 
+                            reaction.user._id !== post.currentUserReaction
+                        )
+                    };
+                }
+                
+                // Update or add reaction
+                const updatedReactions = post.reactions.filter(reaction => 
+                    reaction.user._id !== post.currentUserReaction
+                );
+                return {
+                    ...post,
+                    reactions: [...updatedReactions, newReaction]
+                };
+            }
+            return post;
+        }));
+    };
 
 // Fetch initial posts when the component is mounted
     useEffect(() => {
@@ -69,12 +95,12 @@ export default function Posts() {
                 endMessage={null}
             >
                 {posts.map((post, index) => (
-                    <Post key={index} post={post} hidePostFromList={hidePostFromList} />
+                    <Post key={index} post={post} hidePostFromList={hidePostFromList} updatePostReactions={updatePostReactions} />
                 ))}
             </InfiniteScroll>
         </div>
     ):(
-        <div className="flex flex-col items-center justify-center w-full h-auto space-x-8 space-y-16 lg:flex-row lg:space-y-0 2xl:space-x-0 mt-3">
+        <div className="flex flex-col items-center justify-center w-full h-auto mt-3 space-x-8 space-y-16 lg:flex-row lg:space-y-0 2xl:space-x-0">
             <div className="flex flex-col items-center justify-center w-full text-center lg:w-1/2 lg:px-2 xl:px-0">
                 <p className="font-bold tracking-wider text-gray-300 text-7xl md:text-8xl lg:text-9xl">Sorry</p>
                 <p className="mt-2 text-4xl font-bold tracking-wider text-gray-300 md:text-5xl lg:text-6xl">there's no posts to be shown</p>

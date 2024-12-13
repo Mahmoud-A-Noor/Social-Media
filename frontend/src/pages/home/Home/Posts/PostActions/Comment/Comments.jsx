@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import notify from "../../../../../../utils/notify.js";
 import axiosInstance from "../../../../../../config/axios.js";
+import {CircleFadeLoader} from "react-loaders-kit";
 
 const Comments = ({ postId, comments, setComments }) => {
     const [page, setPage] = useState(1);
@@ -143,7 +144,7 @@ const Comments = ({ postId, comments, setComments }) => {
                 dataLength={comments.length}
                 next={fetchComments}
                 hasMore={hasMore}
-                loader={<h4>Loading...</h4>}
+                loader={<CircleFadeLoader />}
                 endMessage={null}
             >
                 {comments.map((comment) => (

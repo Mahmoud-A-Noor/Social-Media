@@ -5,9 +5,17 @@ const notificationSchema = new Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Recipient
     actorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Triggering user
     postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Posts' }, // Related post (optional)
-    actionType: { type: String, required: true }, // 'comment', 'like', 'follow', friend request.
     message: { type: String, required: true },
-    isRead: { type: Boolean, default: false },
+    actionType: { 
+        type: String, 
+        enum: ['comment', 'reaction', 'share', 'friend_request', 'follow', 'unfollow', 'unfriend', 'block'],
+        required: true 
+    },
+    status: { 
+        type: String, 
+        enum: ['pending', 'accepted', 'declined', 'read'],
+        default: 'pending'
+    },
     createdAt: { type: Date, default: Date.now }
 });
 

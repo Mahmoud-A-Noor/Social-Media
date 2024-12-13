@@ -3,7 +3,7 @@ import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { BrokenCirclesLoader } from "react-loaders-kit";
 
 const PdfViewer = ({ fileUrl, openModal, closeModal, pageThumbnailPluginInstance, thumbnailPluginInstance }) => (
-    <div className="w-full h-full cursor-pointer flex justify-center items-center bg-gray-200" onClick={() => openModal(
+    <div className="flex items-center justify-center w-full h-full bg-gray-200 cursor-pointer" onClick={() => openModal(
         <div className="relative max-w-[90%] h-full mx-auto">
             <button
                 onClick={closeModal}

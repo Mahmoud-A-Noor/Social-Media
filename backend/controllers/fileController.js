@@ -75,18 +75,16 @@ exports.updateFile = async (req, res) => {
 
 // Route to stream the video dynamically using a video URL passed in the query string
 exports.streamVideo = (req, res) => {
-    const videoUrl = req.query.url; // Get the video URL from the query string
-    const fileExtension = req.query.fileExtension; // Get the video URL from the query string
+    const videoUrl = req.query.url;
+    const fileExtension = req.query.fileExtension;
 
     if (!videoUrl) {
         return res.status(400).send('Video URL is required');
     }
 
     const range = req.headers.range;
-
     if (!range) {
-        res.status(400).send('Range header is required');
-        return;
+        return res.status(400).send('Range header is required');
     }
 
     https.get(videoUrl, (videoResponse) => {
@@ -96,27 +94,66 @@ exports.streamVideo = (req, res) => {
         }
 
         const videoSize = parseInt(videoResponse.headers['content-length']);
-        const CHUNK_SIZE = 10 ** 6; // 1MB chunk size
-
-        const start = parseInt(range.replace(/\D/g, ''));
-        const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
-
+        
+        // Parse the range header
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : videoSize - 1;
+        
+        // Calculate content length
         const contentLength = end - start + 1;
 
-        res.status(206); // Partial content
-        res.set({
+        // Map file extensions to MIME types
+        const mimeTypes = {
+            'video/mp4': ['mp4'],
+            'video/webm': ['webm'],
+            'video/ogg': ['ogg'],
+            'video/quicktime': ['mov'],
+            'video/x-msvideo': ['avi'],
+            'video/x-matroska': ['mkv']
+        };
+
+        // Get the file extension from the URL
+        const extension = videoUrl.split('.').pop().toLowerCase();
+        
+        // Find the correct MIME type
+        let contentType = 'video/mp4'; // default
+        for (const [type, extensions] of Object.entries(mimeTypes)) {
+            if (extensions.includes(extension)) {
+                contentType = type;
+                break;
+            }
+        }
+
+        // Set response headers
+        const headers = {
             'Content-Range': `bytes ${start}-${end}/${videoSize}`,
             'Accept-Ranges': 'bytes',
             'Content-Length': contentLength,
-            'Content-Type': fileExtension,
-            'Cache-Control': 'no-cache, no-store, must-revalidate', // Disable caching
-            'Pragma': 'no-cache', // Older HTTP/1.0 cache control
-            'Expires': '0', // Prevent caching in the future
+            'Content-Type': contentType,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        };
+
+        // Send partial content response
+        res.writeHead(206, headers);
+
+        // Create a new request for the specific range
+        https.get(videoUrl, { 
+            headers: { 
+                'Range': `bytes=${start}-${end}`,
+                'Accept': contentType
+            }
+        }, (rangeResponse) => {
+            rangeResponse.pipe(res);
+        }).on('error', (err) => {
+            console.error("Error with range request:", err);
+            res.status(500).send('Error streaming video range');
         });
 
-        videoResponse.pipe(res);
     }).on('error', (err) => {
-        console.error("Error with video stream:", err);
+        console.error("Error with initial video request:", err);
         res.status(500).send('Error fetching the video');
     });
-}
+};

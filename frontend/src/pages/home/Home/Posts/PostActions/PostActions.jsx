@@ -4,15 +4,15 @@ import CommentButton from "./Comment/CommentButton.jsx";
 import SendButton from "./SendButton.jsx";
 import {useState} from "react";
 
-export default function PostActions({postId, authorId}) {
+export default function PostActions({post, updatePostReactions}) {
 
 
     return (
         <div id="post-bottom-part" className="flex items-center justify-center w-full px-3 mt-1">
-            <ReactButton postId={postId} />
-            <CommentButton postId={postId} />
+            <ReactButton postId={post._id} post={post} updatePostReactions={updatePostReactions} />
+            <CommentButton post={post} />
             <SendButton />
-            <ShareButton postId={postId} />
+            <ShareButton postId={post._id} />
         </div>
     )
 }
