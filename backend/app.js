@@ -10,6 +10,8 @@ const postRoutes = require("./routes/postRoutes");
 const userRoutes = require("./routes/userRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const fileRoutes = require("./routes/fileRoutes");
+const messageRoutes = require("./routes/MessageRoutes");
+const chatRoutes = require('./routes/chatRoutes');
 
 const cors = require('cors');
 
@@ -39,7 +41,8 @@ app.use('/posts', postRoutes);
 app.use('/user', userRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/file', fileRoutes);
-
+app.use('/messages', messageRoutes);
+app.use('/chats', chatRoutes);
 
 
 app.use(errorHandler);

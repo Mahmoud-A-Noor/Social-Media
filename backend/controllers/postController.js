@@ -2,9 +2,6 @@ const Post = require('../models/Post');
 const User = require('../models/User');
 const Reaction = require('../models/Reaction');
 const Comment = require('../models/Comment');
-const Notification = require('../models/Notification');
-
-const { getIoInstance } = require('../config/socket');
 const cloudinary = require("../config/cloudinary");
 const { createNotification } = require('../utils/notificationHelper');
 

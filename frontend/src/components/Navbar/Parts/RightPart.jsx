@@ -1,4 +1,8 @@
 import { useState, useRef, useEffect } from "react";
+
+import axiosInstance from "../../../config/axios";
+import socketService from '../../../config/socket';
+
 import useThemeSwitcher from "../../../hooks/useThemeSwitcher";
 import NotificationsDropdown from './NotificationsDropdown';
 
@@ -24,6 +28,7 @@ export default function RightPart() {
     const [isNavMenuDropdownOpen, setIsNavMenuDropdownOpen] = useState(false)
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
     const [theme, toggleTheme] = useThemeSwitcher()
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const imageDropdownButtonRef = useRef(null);
     const imageDropdownRef = useRef(null);
@@ -45,6 +50,9 @@ export default function RightPart() {
     const toggleNotifications = (e) => {
         e.stopPropagation();
         setIsNotificationsOpen(prev => !prev);
+        if (!isNotificationsOpen) {
+            setUnreadCount(0); // Reset count when opening notifications
+        }
     };
 
     useEffect(() => {
@@ -80,6 +88,32 @@ export default function RightPart() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+
+    useEffect(() => {
+        // Fetch initial unread count
+        const fetchUnreadCount = async () => {
+            try {
+                const response = await axiosInstance.get('/notifications/unread-count');
+                setUnreadCount(response.data.count);
+            } catch (error) {
+                console.error('Error fetching unread count:', error);
+            }
+        };
+
+        fetchUnreadCount();
+
+        // Listen for new notifications
+        socketService.on('notification', () => {
+            setUnreadCount(prev => prev + 1);
+        });
+
+        return () => {
+            socketService.off('notification');
+        };
+    }, []);
+
+    
 
     return (
         <div className="flex items-center justify-center">
@@ -153,6 +187,11 @@ export default function RightPart() {
                     onClick={toggleNotifications}
                 >
                     <BiSolidBellRing className="text-xl" />
+                    {unreadCount > 0 && (
+                        <div className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center bg-red-500 text-white text-xs rounded-full px-1">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                        </div>
+                    )}
                 </div>
                 <div ref={notificationsDropdownRef}>
                     <NotificationsDropdown isOpen={isNotificationsOpen} />

@@ -110,3 +110,86 @@ exports.getStories = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+exports.getAllUsers = async (req, res) => {
+    try {
+        const currentUserId = req.user.id;
+        
+        // Get the current user with populated friends
+        const currentUser = await User.findById(currentUserId)
+            .populate({
+                path: 'friends',
+                select: 'username profileImage status lastSeen unreadMessages',
+                match: { 
+                    _id: { $nin: req.user.blockedUsers }
+                }
+            })
+            .lean();
+
+        if (!currentUser || !currentUser.friends) {
+            return res.status(200).json([]);
+        }
+
+        // Process and sort friends
+        const friendsWithMetadata = currentUser.friends.map(friend => ({
+            ...friend,
+            // Handle unreadMessages as a plain object
+            unreadMessages: friend.unreadMessages ? 
+                Object.values(friend.unreadMessages).reduce((a, b) => a + b, 0) : 0
+        }));
+
+        // Sort friends:
+        // 1. Friends with unread messages (sorted by number of unread messages)
+        // 2. Online friends
+        // 3. Offline friends (sorted by lastSeen)
+        const sortedFriends = friendsWithMetadata.sort((a, b) => {
+            // First priority: unread messages
+            if (a.unreadMessages !== b.unreadMessages) {
+                return b.unreadMessages - a.unreadMessages;
+            }
+            
+            // Second priority: online status
+            if (a.status !== b.status) {
+                return a.status === 'online' ? -1 : 1;
+            }
+            
+            // Third priority: for offline users, sort by lastSeen
+            if (a.status === 'offline' && b.status === 'offline') {
+                return new Date(b.lastSeen) - new Date(a.lastSeen);
+            }
+            
+            // Finally, sort by username
+            return a.username.localeCompare(b.username);
+        });
+
+        res.status(200).json(sortedFriends);
+    } catch (error) {
+        console.error('Error in getAllUsers:', error);
+        res.status(500).json({ 
+            message: 'Server error', 
+            error: error.message 
+        });
+    }
+};
+
+exports.searchUsers = async (req, res) => {
+    try {
+        const { query } = req.query;
+        const currentUserId = req.user.id;
+
+        const users = await User.find({
+            username: { $regex: query, $options: 'i' },
+            _id: { 
+                $ne: currentUserId,
+                $nin: req.user.blockedUsers 
+            }
+        })
+        .select('username profileImage status')
+        .limit(10);
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Error searching users:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

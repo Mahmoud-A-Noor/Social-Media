@@ -31,7 +31,7 @@
 
 @layer base{
     html{
-        @apply box-border
+        @apply box-border overflow-x-hidden
     }
     body{
       @apply  bg-[#F0F2F5];

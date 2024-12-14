@@ -1,6 +1,5 @@
 const User = require('../models/User');
 const Notification = require('../models/Notification');
-const io = require('../config/socket');
 const { createNotification } = require('../utils/notificationHelper');
 
 exports.followUser = async (req, res) => {
@@ -69,36 +68,23 @@ exports.sendFriendRequest = async (req, res) => {
         const targetUser = await User.findById(userId);
         if (!targetUser) return res.status(404).json({ message: 'User not found' });
 
-        // Check if there's an existing friend request from target to current user
+        // Check if users are already friends
+        if (currentUser.friends.includes(userId)) {
+            return res.status(400).json({ message: 'You are already friends with this user' });
+        }
+
+        // Check if there's already a pending request
         const existingRequest = await Notification.findOne({
-            user: currentUser._id,
-            actorId: userId,
+            $or: [
+                { user: userId, actorId: currentUser._id },
+                { user: currentUser._id, actorId: userId }
+            ],
             actionType: 'friend_request',
             status: 'pending'
         });
 
         if (existingRequest) {
-            // Auto-accept since both users sent requests
-            existingRequest.status = 'accepted';
-            await existingRequest.save();
-
-            // Add both users as friends
-            if (!currentUser.friends.includes(userId)) {
-                currentUser.friends.push(userId);
-                targetUser.friends.push(currentUser._id);
-                await Promise.all([currentUser.save(), targetUser.save()]);
-            }
-
-            // Notify target user about accepted request
-            await createNotification({
-                userId,
-                actorId: currentUser._id,
-                actionType: 'friend_request',
-                message: `${currentUser.username} accepted your friend request`,
-                status: 'accepted'
-            });
-
-            return res.status(200).json({ message: 'Friend request accepted automatically' });
+            return res.status(400).json({ message: 'A friend request already exists between these users' });
         }
 
         // Create new friend request notification
@@ -117,15 +103,34 @@ exports.sendFriendRequest = async (req, res) => {
 };
 
 exports.respondToFriendRequest = async (req, res) => {
-    const { notificationId, accept } = req.body;
+    const { notificationId, userId, accept } = req.body;
     const currentUser = req.user;
 
     try {
-        const notification = await Notification.findById(notificationId)
-            .populate('actorId', 'username');
+        let notification;
+        
+        if (notificationId) {
+            // If notification ID is provided, use it
+            notification = await Notification.findById(notificationId)
+                .populate('actorId', 'username');
+                
+            if (!notification) {
+                return res.status(404).json({ message: 'Friend request not found' });
+            }
+        } else if (userId) {
+            // If user ID is provided, find the pending friend request
+            notification = await Notification.findOne({
+                user: currentUser._id,
+                actorId: userId,
+                actionType: 'friend_request',
+                status: 'pending'
+            }).populate('actorId', 'username');
 
-        if (!notification) {
-            return res.status(404).json({ message: 'Friend request not found' });
+            if (!notification) {
+                return res.status(404).json({ message: 'No pending friend request found from this user' });
+            }
+        } else {
+            return res.status(400).json({ message: 'Either notificationId or userId is required' });
         }
 
         notification.status = accept ? 'accepted' : 'declined';
@@ -135,8 +140,12 @@ exports.respondToFriendRequest = async (req, res) => {
             const requestingUser = await User.findById(notification.actorId);
             
             // Add as friends
-            currentUser.friends.push(notification.actorId);
-            requestingUser.friends.push(currentUser._id);
+            if (!currentUser.friends.includes(notification.actorId._id)) {
+                currentUser.friends.push(notification.actorId._id);
+            }
+            if (!requestingUser.friends.includes(currentUser._id)) {
+                requestingUser.friends.push(currentUser._id);
+            }
             await Promise.all([currentUser.save(), requestingUser.save()]);
 
             // Notify the requesting user

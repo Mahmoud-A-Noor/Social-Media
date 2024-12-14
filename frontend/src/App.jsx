@@ -11,6 +11,7 @@ import PrivateRoute from "./components/Route/PrivateRoute.jsx";
 import socketService from './config/socket';
 
 
+
 function App() {
     useEffect(() => {
         // Connect to socket when app loads

@@ -5,7 +5,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { PulseBubbleLoader } from "react-loaders-kit";
 import { formatDistanceToNow } from 'date-fns';
 
-const NotificationsDropdown = ({ isOpen }) => {
+const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
     const [notifications, setNotifications] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -141,6 +141,7 @@ const NotificationsDropdown = ({ isOpen }) => {
                     status: 'read' 
                 }))
             );
+            setUnreadCount(0);
         } catch (error) {
             console.error('Error marking notifications as read:', error);
         }
@@ -156,6 +157,7 @@ const NotificationsDropdown = ({ isOpen }) => {
                         : notification
                 )
             );
+            setUnreadCount(prev => Math.max(0, prev - 1));
         } catch (error) {
             console.error('Error marking notification as read:', error);
         }

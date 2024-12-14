@@ -16,39 +16,28 @@ const initializeSocket = (server) => {
         const userId = socket.handshake.query.userId;
 
         if (userId && userId !== 'null' && userId !== 'undefined') {
-            // Join the user to a room named after their userId
             socket.join(userId);
-
-            // Mark user as online
             updateUserStatus(userId, 'online');
-
-            // Notify others about the status change
             socket.broadcast.emit('user-status-change', { id: userId, status: 'online' });
 
-            // Handle disconnection
+            // Handle typing events
+            socket.on('typing', ({ chatId }) => {
+                socket.to(chatId).emit('user-typing', { chatId, user: userId });
+            });
+
+            socket.on('stop-typing', ({ chatId }) => {
+                socket.to(chatId).emit('user-stop-typing', { chatId, user: userId });
+            });
+
             socket.on('disconnect', () => {
                 console.log(`User disconnected: ${socket.id}`);
-                if (userId && userId !== 'null' && userId !== 'undefined') {
+                if (userId) {
                     updateUserStatus(userId, 'offline');
-
-                    // Notify others about the status change
                     socket.broadcast.emit('user-status-change', { id: userId, status: 'offline' });
                 }
             });
         }
     });
-
-    const updateUserStatus = async (userId, status) => {
-        try {
-            if (!userId || userId === 'null' || userId === 'undefined') {
-                console.log('Invalid userId for status update:', userId);
-                return;
-            }
-            await User.findByIdAndUpdate(userId, { status }, { new: true });
-        } catch (error) {
-            console.error(`Error updating user status: ${error.message}`);
-        }
-    };
 
     return io;
 };
@@ -58,6 +47,21 @@ const getIoInstance = () => {
         throw new Error("Socket.io has not been initialized!");
     }
     return io;
+};
+
+const updateUserStatus = async (userId, status) => {
+    try {
+        if (!userId || userId === 'null' || userId === 'undefined') {
+            console.log('Invalid userId for status update:', userId);
+            return;
+        }
+        await User.findByIdAndUpdate(userId, { 
+            status,
+            lastSeen: status === 'offline' ? Date.now() : undefined
+        });
+    } catch (error) {
+        console.error(`Error updating user status: ${error.message}`);
+    }
 };
 
 module.exports = { initializeSocket, getIoInstance };
