@@ -18,9 +18,10 @@ exports.sendMessage = async (req, res) => {
       .populate('sender', 'username profileImage status')
       .populate('chatId');
 
-    // Emit the message to all users in the chat
+    // Emit the message to all users in the chat, including sender
     const io = getIoInstance();
     const chat = await Chat.findById(chatId);
+
     chat.participants.forEach(participantId => {
       io.to(participantId.toString()).emit('new-message', populatedMessage);
     });

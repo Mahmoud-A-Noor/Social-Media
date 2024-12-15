@@ -37,10 +37,11 @@ const Messenger = () => {
   useEffect(() => {
     const handleNewMessage = (newMessage) => {
       console.log('New message received:', newMessage);
+
       setMessages(prev => {
         const chatMessages = [...(prev[newMessage.chatId] || [])];
         if (!chatMessages.some(msg => msg._id === newMessage._id)) {
-          chatMessages.push(newMessage);
+          chatMessages.unshift(newMessage);
         }
         return {
           ...prev,
@@ -48,8 +49,8 @@ const Messenger = () => {
         };
       });
 
-      if (newMessage.sender !== currentUserId && 
-          (!isOpen || currentChat?._id !== newMessage.chatId)) {
+      if (newMessage.sender.toString() !== currentUserId && 
+          (!isOpen || (currentChat && currentChat._id.toString() !== newMessage.chatId.toString()))) {
         setUnreadCount(prev => prev + 1);
       }
     };
@@ -95,17 +96,11 @@ const Messenger = () => {
     try {
       const response = await axiosInstance.post(`/messages`, { content, chatId });
       
-      // Update messages state with the new message
+      // Optimistically update messages state with the new message
       setMessages(prev => ({
         ...prev,
-        [chatId]: [...(prev[chatId] || []), response.data]
+        [chatId]: [response.data, ...(prev[chatId] || [])]
       }));
-
-      // Emit socket event
-      socketService.emit('new-message', {
-        chatId,
-        message: response.data
-      });
 
       return response.data;
     } catch (error) {
@@ -221,7 +216,7 @@ const Messenger = () => {
             {/* Close Button */}
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute z-10 p-2 text-2xl text-gray-600 hover:text-gray-800 right-2 top-0"
+              className="absolute z-10 p-2 text-2xl text-gray-600 hover:text-gray-800 right-2 top-2"
             >
               ×
             </button>
@@ -274,7 +269,7 @@ const Messenger = () => {
                 <>
                   <div className="flex items-center justify-between p-4 text-white bg-blue-500">
                     <h3 className="font-semibold truncate">
-                      {currentChat.participants.find(p => p._id !== currentUserId)?.username}
+                      {currentChat.participants.find(p => p._id.toString() !== currentUserId)?.username}
                     </h3>
                   </div>
                   <div className="flex flex-col flex-1 min-h-0">
