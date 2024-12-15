@@ -36,21 +36,26 @@ const Messenger = () => {
   // Listen for socket events
   useEffect(() => {
     const handleNewMessage = (newMessage) => {
-      console.log('New message received:', newMessage);
 
       setMessages(prev => {
-        const chatMessages = [...(prev[newMessage.chatId] || [])];
-        if (!chatMessages.some(msg => msg._id === newMessage._id)) {
+        // Get the chat ID from the chatId object
+        const chatId = newMessage.chatId._id.toString();
+        const chatMessages = [...(prev[chatId] || [])];
+        
+        // Check if message doesn't already exist
+        if (!chatMessages.some(msg => msg._id.toString() === newMessage._id.toString())) {
           chatMessages.unshift(newMessage);
         }
+        
         return {
           ...prev,
-          [newMessage.chatId]: chatMessages
+          [chatId]: chatMessages
         };
       });
 
-      if (newMessage.sender.toString() !== currentUserId && 
-          (!isOpen || (currentChat && currentChat._id.toString() !== newMessage.chatId.toString()))) {
+      // Update unread count if needed
+      if (newMessage.sender._id.toString() !== currentUserId && 
+          (!isOpen || (currentChat && currentChat._id.toString() !== newMessage.chatId._id.toString()))) {
         setUnreadCount(prev => prev + 1);
       }
     };
@@ -89,19 +94,15 @@ const Messenger = () => {
       socketService.off('stop-typing', handleStopTyping);
       socketService.off('user-status-change');
     };
-  }, [isOpen, currentChat, currentUserId]);
+  }, [isOpen, currentChat, currentUserId, messages]);
 
   // Handle sending message
   const handleSendMessage = async (chatId, content) => {
     try {
       const response = await axiosInstance.post(`/messages`, { content, chatId });
       
-      // Optimistically update messages state with the new message
-      setMessages(prev => ({
-        ...prev,
-        [chatId]: [response.data, ...(prev[chatId] || [])]
-      }));
-
+      // Remove the optimistic update since we'll receive the message through socket
+      // The socket event will handle adding the message to the state
       return response.data;
     } catch (error) {
       console.error('Error sending message:', error);
