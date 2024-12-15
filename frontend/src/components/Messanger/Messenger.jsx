@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaComments } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import Messages from './Messages';
@@ -10,6 +10,7 @@ import getUserIdFromToken from '../../utils/getUserIdFromToken';
 
 const Messenger = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const messengerRef = useRef(null);
   const [currentChat, setCurrentChat] = useState(null);
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState({});
@@ -151,6 +152,40 @@ const Messenger = () => {
     return a.username.localeCompare(b.username);
   });
 
+  // Add this useEffect for body scroll locking
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  // Add this useEffect for click outside handling
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        messengerRef.current && 
+        !messengerRef.current.contains(event.target) &&
+        !event.target.closest('button') // This prevents closing when clicking the messenger button
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
     <div className="flex h-screen">
       {/* Floating Button with Unread Count */}
@@ -173,6 +208,7 @@ const Messenger = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            ref={messengerRef}
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
@@ -182,6 +218,14 @@ const Messenger = () => {
                      md:w-[75vw]
                      lg:w-[800px]"
           >
+            {/* Close Button */}
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute z-10 p-2 text-2xl text-gray-600 hover:text-gray-800 right-2 top-0"
+            >
+              ×
+            </button>
+
             {/* Users List */}
             <div className="flex flex-col w-full max-w-[280px] border-r sm:w-64">
               <div className="p-4 text-white bg-blue-500">
@@ -232,12 +276,6 @@ const Messenger = () => {
                     <h3 className="font-semibold truncate">
                       {currentChat.participants.find(p => p._id !== currentUserId)?.username}
                     </h3>
-                    <button
-                      onClick={() => setIsOpen(false)}
-                      className="ml-2 text-white hover:text-gray-200"
-                    >
-                      ×
-                    </button>
                   </div>
                   <div className="flex flex-col flex-1 min-h-0">
                     <Messages 
