@@ -5,6 +5,7 @@ import Login from "./pages/login/Login.jsx"
 import Register from "./pages/register/Register.jsx"
 import Profile from "./pages/profile/page"
 import NotFound from "./pages/404/page"
+import LiveStreamPage from "./components/LiveStream/LiveStreamPage";
 
 import { AuthProvider } from './context/authContext.jsx';
 import PrivateRoute from "./components/Route/PrivateRoute.jsx";
@@ -30,6 +31,7 @@ function App() {
                     <Route exact path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/live/:streamerId" element={<LiveStreamPage />} />
                     <Route path="/profile/:username" element={<PrivateRoute><Profile/></PrivateRoute>}/>
                     <Route path="*" element={<NotFound />} />
                 </Routes>

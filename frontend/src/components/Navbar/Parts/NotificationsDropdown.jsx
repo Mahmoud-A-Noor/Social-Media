@@ -147,12 +147,16 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
         }
     };
 
-    const handleNotificationClick = async (notificationId) => {
+    const handleNotificationClick = async (notification) => {
+        if (notification.actionType === 'live_stream') {
+            // Navigate to live stream viewer
+            window.location.href = `/live/${notification.actorId._id}`;
+        }
         try {
-            await axiosInstance.put(`/notifications/${notificationId}/mark-read`);
+            await axiosInstance.put(`/notifications/${notification._id}/mark-read`);
             setNotifications(prev => 
                 prev.map(notification => 
-                    notification._id === notificationId 
+                    notification._id === notification._id 
                         ? { ...notification, status: 'read' }
                         : notification
                 )
@@ -201,7 +205,7 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
                     {notifications.map((notification, index) => (
                         <div
                             key={`${notification._id}-${index}`}
-                            onClick={() => handleNotificationClick(notification._id)}
+                            onClick={() => handleNotificationClick(notification)}
                             className={`
                                 p-4 border-b transition-all duration-300 cursor-pointer
                                 ${notification.status !== 'read' ? 'bg-blue-50' : 'bg-white'}

@@ -8,7 +8,7 @@ const notificationSchema = new Schema({
     message: { type: String, required: true },
     actionType: { 
         type: String, 
-        enum: ['comment', 'reaction', 'share', 'friend_request', 'follow', 'unfollow', 'unfriend', 'block'],
+        enum: ['comment', 'reaction', 'share', 'friend_request', 'follow', 'unfollow', 'unfriend', 'block', 'live_stream'],
         required: true 
     },
     status: { 

@@ -10,5 +10,6 @@ router.put('/mark-read', notificationController.markAllAsRead);
 router.put('/:notificationId/mark-read', notificationController.markAsRead);
 router.delete('/clear', notificationController.clearNotifications);
 router.get('/unread-count', notificationController.getUnreadCount);
+router.post('/create-live-stream', notificationController.createLiveStreamNotification);
 
 module.exports = router;

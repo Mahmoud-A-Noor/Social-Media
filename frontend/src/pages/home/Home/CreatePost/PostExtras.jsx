@@ -1,13 +1,16 @@
+import { useState } from 'react';
+
 import {RiLiveFill} from "react-icons/ri";
 import {FaPhotoVideo} from "react-icons/fa";
 import {IoHappyOutline} from "react-icons/io5";
 import {Angry, Care, Haha, Like, Sad, Wow} from "../../../../constants/facebook-reactions.jsx";
 import {usePostContext} from "../../../../context/CreatePostContext.jsx";
-
+import LiveStreamModal from '../../../../components/LiveStream/LiveStreamModal.jsx';
 
 export default function PostExtras() {
 
     const {isReactionsVisible, setIsReactionsVisible, feeling, setFeeling, handleFileSelect, setIsModalOpen} = usePostContext()
+    const [isLiveStreamOpen, setIsLiveStreamOpen] = useState(false);
 
     const handleFeelingChange = (feel) => {
         if(!feeling){
@@ -38,13 +41,15 @@ export default function PostExtras() {
         <>
             <div className="flex">
                 <div
-                    className="flex items-center justify-center flex-1 py-3 rounded-lg hover:bg-gray-200 xs:max-sm:px-1">
+                    className="flex items-center justify-center flex-1 py-3 rounded-lg cursor-pointer hover:bg-gray-200 xs:max-sm:px-1"
+                    onClick={() => setIsLiveStreamOpen(true)}
+                >
                     <RiLiveFill className="text-2xl sm:max-md:text-xl xs:max-sm:text-lg"/>
                     <span
                         className="text-base font-semibold text-gray-500 sm:max-md:text-sm xs:max-sm:text-xs ms-2 text-nowrap">Live Video</span>
                 </div>
                 <label
-                    className="flex items-center justify-center flex-1 py-3 rounded-lg hover:bg-gray-200 xs:max-sm:px-1 cursor-pointer">
+                    className="flex items-center justify-center flex-1 py-3 rounded-lg cursor-pointer hover:bg-gray-200 xs:max-sm:px-1">
                     <FaPhotoVideo className="text-2xl sm:max-md:text-xl xs:max-sm:text-lg"/>
                     <span
                         className="text-base font-semibold text-gray-500 sm:max-md:text-sm xs:max-sm:text-xs ms-2">Photo/video</span>
@@ -53,12 +58,12 @@ export default function PostExtras() {
                         setIsModalOpen(true)
                     }}/>
                 </label>
-                <div className="relative group flex-1">
+                <div className="relative flex-1 group">
                     <div
-                        className="flex items-center justify-center py-3 rounded-lg hover:bg-gray-200 xs:max-sm:px-1 cursor-pointer"
+                        className="flex items-center justify-center py-3 rounded-lg cursor-pointer hover:bg-gray-200 xs:max-sm:px-1"
                         onMouseEnter={() => setIsReactionsVisible(true)}
                         onMouseLeave={() => setIsReactionsVisible(false)}>
-                        <div className="text-2xl sm:max-md:text-xl xs:max-sm:text-lg w-6 h-6">
+                        <div className="w-6 h-6 text-2xl sm:max-md:text-xl xs:max-sm:text-lg">
                             {feeling ? renderFeelingEmoji() : <IoHappyOutline/>}
                         </div>
                         <span
@@ -107,6 +112,9 @@ export default function PostExtras() {
                     </div>
                 </div>
             </div>
+            {isLiveStreamOpen && (
+                <LiveStreamModal onClose={() => setIsLiveStreamOpen(false)} />
+            )}
         </>
     )
 }

@@ -36,6 +36,50 @@ const initializeSocket = (server) => {
                     socket.broadcast.emit('user-status-change', { id: userId, status: 'offline' });
                 }
             });
+
+            socket.on('live-stream-start', ({ streamerId, streamData }) => {
+                // Join streamer to their own room
+                socket.join(`stream-${streamerId}`);
+                
+                // Notify followers/friends based on visibility
+                socket.broadcast.emit('new-live-stream', { 
+                    streamerId, 
+                    streamData 
+                });
+            });
+
+            socket.on('live-stream-chunk', ({ chunk, streamerId }) => {
+                // Broadcast chunk to all viewers in this stream's room
+                socket.to(`stream-${streamerId}`).emit('stream-chunk', { chunk });
+            });
+
+            socket.on('join-stream', ({ streamerId }) => {
+                socket.join(`stream-${streamerId}`);
+                // Optionally notify streamer about new viewer
+                socket.to(`stream-${streamerId}`).emit('viewer-joined', { 
+                    viewerId: socket.handshake.query.userId 
+                });
+            });
+
+            socket.on('leave-stream', ({ streamerId }) => {
+                socket.leave(`stream-${streamerId}`);
+                // Optionally notify streamer about viewer leaving
+                socket.to(`stream-${streamerId}`).emit('viewer-left', { 
+                    viewerId: socket.handshake.query.userId 
+                });
+            });
+
+            socket.on('live-stream-end', ({ streamerId }) => {
+                // Notify all viewers in the stream room that stream has ended
+                io.to(`stream-${streamerId}`).emit('stream-ended', { streamerId });
+                // Clean up the room
+                const room = io.sockets.adapter.rooms.get(`stream-${streamerId}`);
+                if (room) {
+                    for (const clientId of room) {
+                        io.sockets.sockets.get(clientId).leave(`stream-${streamerId}`);
+                    }
+                }
+            });
         }
     });
 

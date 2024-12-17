@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BarsLoader } from 'react-loaders-kit';
 import getUserIdFromToken from '../../utils/getUserIdFromToken';
 import notify from '../../utils/notify';
