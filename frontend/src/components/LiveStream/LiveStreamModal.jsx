@@ -32,13 +32,29 @@ export default function LiveStreamModal({ onClose }) {
 
     const startStream = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: true, 
-                audio: true 
-            });
-            videoRef.current.srcObject = stream;
+            // Use existing preview stream
+            if (!previewStream) {
+                notify("Camera access not available", "error");
+                return;
+            }
             
-            mediaRecorderRef.current = new MediaRecorder(stream);
+            // Maximum quality settings
+            const options = {
+                mimeType: 'video/webm;codecs=vp8,opus',
+                videoBitsPerSecond: 8000000,    // 8 Mbps for high video quality
+                audioBitsPerSecond: 320000,     // 320 kbps (studio quality audio)
+                bitsPerSecond: 8320000,         // Total bitrate
+                audioChannels: 2,               // Stereo audio
+                sampleRate: 48000,             // Professional audio sample rate
+                videoWidth: 1920,              // Full HD width
+                videoHeight: 1080              // Full HD height
+            };
+            
+            mediaRecorderRef.current = new MediaRecorder(previewStream, options);
+            
+            // Even smaller chunk interval for smoother recording
+            const chunkInterval = 250; // 250ms chunks for better quality
+            
             mediaRecorderRef.current.ondataavailable = (event) => {
                 if (event.data.size > 0) {
                     setRecordedChunks((prev) => [...prev, event.data]);
@@ -49,17 +65,17 @@ export default function LiveStreamModal({ onClose }) {
                 }
             };
 
-            // Start recording immediately
-            startRecording();
+            // Start recording with smaller time slices
+            startRecording(chunkInterval);
         } catch (err) {
-            console.error("Error accessing camera:", err);
-            notify("Failed to access camera/microphone", "error");
+            console.error("Error starting stream:", err);
+            notify("Failed to start stream", "error");
         }
     };
 
-    const startRecording = () => {
+    const startRecording = (timeSlice = 500) => {
         setRecordedChunks([]);
-        mediaRecorderRef.current.start(1000);
+        mediaRecorderRef.current.start(timeSlice);
         setIsRecording(true);
         
         // Notify users about the stream
@@ -67,7 +83,7 @@ export default function LiveStreamModal({ onClose }) {
             streamerId: userId,
             streamData: {
                 text: "Started a live stream",
-                visibility: 'public' // Default to public for live streams
+                visibility: 'public'
             }
         });
 
@@ -109,32 +125,43 @@ export default function LiveStreamModal({ onClose }) {
     };
 
     const handleSaveStream = async ({ postText, visibility, feeling }) => {
-        if (recordedChunks.length === 0) return;
-
-        const blob = new Blob(recordedChunks, { type: 'video/webm' });
-        const fileName = `${userId}-${new Date().toISOString()}-live-stream.webm`;
-        const file = new File([blob], fileName, { type: 'video/webm' });
-
         try {
-            const fileUrl = await uploadFile(file);
-            
-            // Create post with the recorded stream
-            await axiosInstance.post("/posts", {
-                text: postText,
-                media: { 
-                    url: fileUrl, 
-                    type: "video"
-                },
-                feeling: feeling,
-                postVisibility: visibility
+            if (recordedChunks.length === 0) {
+                notify("No stream data available to save", "error");
+                return;
+            }
+
+            // Create a blob with explicit MIME type
+            const blob = new Blob(recordedChunks, { 
+                type: 'video/webm;codecs=vp8,opus'
             });
 
-            notify("Stream saved successfully!", "success");
+            // Create a File object with .webm extension
+            const fileName = `${userId}-${Date.now()}-live.webm`;
+            const file = new File([blob], fileName, { 
+                type: 'video/webm'
+            });
+
+            // Upload and create post...
+            const mediaUrl = await uploadFile(file);
+            
+            const postData = {
+                text: postText,
+                media: {
+                    url: mediaUrl,
+                    type: 'video'
+                },
+                feeling,
+                visibility
+            };
+
+            const response = await axiosInstance.post("/posts", postData);
+            notify("Stream saved successfully as a post!", "success");
             setShowSaveModal(false);
             onClose();
         } catch (err) {
-            console.error("Error saving stream:", err);
-            notify("Error saving stream. Please try again.", "error");
+            console.error("Error in handleSaveStream:", err);
+            notify(err.response?.data?.message || "Error saving stream. Please try again.", "error");
         }
     };
 

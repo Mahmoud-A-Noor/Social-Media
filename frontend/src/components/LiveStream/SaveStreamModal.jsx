@@ -1,17 +1,40 @@
 import { useState } from 'react';
-import { IoHappyOutline, IoEarthSharp } from "react-icons/io5";
+import {Angry, Care, Haha, Sad, Wow} from "../../constants/facebook-reactions.jsx";
+import { IoEarthSharp } from "react-icons/io5";
+import notify from '../../utils/notify.js';
+
 
 export default function SaveStreamModal({ onClose, onSave }) {
     const [postText, setPostText] = useState('');
     const [visibility, setVisibility] = useState('public');
     const [feeling, setFeeling] = useState(null);
-    const [isReactionsVisible, setIsReactionsVisible] = useState(false);
+
+
+    const handleFeelingChange = (feel) => {
+        if(!feeling){
+            setFeeling(feel);
+        }else{
+            if(feeling === feel){
+                setFeeling(null)
+            }else{
+                setFeeling(feel)
+            }
+        }
+    }
+
+    const renderFeelingText = () => {
+        if(feeling === "angry") return <span className="text-base font-normal">is feeling <span className="font-bold text-red-500">Angry</span></span>
+        else if(feeling === "care") return <span className="text-base font-normal">is in <span className="font-bold text-pink-500">Love</span></span>
+        else if(feeling === "haha") return <span className="text-base font-normal">is <span className="font-bold text-green-500">Laughing</span></span>
+        else if(feeling === "sad") return <span className="text-base font-normal">is feeling <span className="font-bold text-blue-500">Sad</span></span>
+        else return <span className="text-base font-normal">is <span className="font-bold text-yellow-500">Shocked</span></span>
+    }
 
     const handleSave = () => {
-        if (!postText.trim()) {
-            notify("Please enter a description for your post", "error");
-            return;
-        }
+        // if (!postText.trim()) {
+        //     notify("Please enter a description for your post", "error");
+        //     return;
+        // }
         onSave({ postText, visibility, feeling });
         onClose();
     };
@@ -46,13 +69,52 @@ export default function SaveStreamModal({ onClose, onSave }) {
                 </div>
 
                 <div className="relative mb-4">
-                    <div
-                        className="flex items-center space-x-2 cursor-pointer"
-                        onMouseEnter={() => setIsReactionsVisible(true)}
-                        onMouseLeave={() => setIsReactionsVisible(false)}
-                    >
-                        <IoHappyOutline className="text-xl"/>
-                        <span>{feeling || "Add Feeling"}</span>
+                    
+                    <div className={`mt-2 w-fit bg-white border border-gray-300 shadow-lg z-[99999] rounded-full transition-opacity duration-300`}>
+                        <div className="flex items-center justify-center px-2 py-1 transition-opacity delay-500">
+                            <h3
+                                className={`mx-1 z-10 transition-all duration-300 cursor-pointer hover:scale-125 size-8 font-bold me-5 mt-1`}
+                                onClick={() => {
+                                    handleFeelingChange(null)
+                                }}>
+                                None
+                            </h3>
+                            <div
+                                className={`mx-1 z-10 transition-all duration-300 cursor-pointer hover:scale-125 ${feeling === "sad" ? "scale-125" : ""} size-8`}
+                                onClick={() => {
+                                    handleFeelingChange("sad")
+                                }}>
+                                <Sad/>
+                            </div>
+                            <div
+                                className={`mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8 ${feeling === "wow" ? "scale-125" : ""}`}
+                                onClick={() => {
+                                    handleFeelingChange("wow")
+                                }}>
+                                <Wow/>
+                            </div>
+                            <div
+                                className={`mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8 ${feeling === "care" ? "scale-125" : ""}`}
+                                onClick={() => {
+                                    handleFeelingChange("care")
+                                }}>
+                                <Care/>
+                            </div>
+                            <div
+                                className={`mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8 ${feeling === "angry" ? "scale-125" : ""}`}
+                                onClick={() => {
+                                    handleFeelingChange("angry")
+                                }}>
+                                <Angry/>
+                            </div>
+                            <div
+                                className={`mx-1 transition-all duration-300 cursor-pointer hover:scale-125 size-8 ${feeling === "haha" ? "scale-125" : ""}`}
+                                onClick={() => {
+                                    handleFeelingChange("haha")
+                                }}>
+                                <Haha/>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

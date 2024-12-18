@@ -194,7 +194,7 @@ export default function RightPart() {
                     )}
                 </div>
                 <div ref={notificationsDropdownRef}>
-                    <NotificationsDropdown isOpen={isNotificationsOpen} />
+                    <NotificationsDropdown isOpen={isNotificationsOpen} setUnreadCount={setUnreadCount} />
                 </div>
             </div>
 
