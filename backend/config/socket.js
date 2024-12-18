@@ -2,6 +2,7 @@ const { Server } = require('socket.io');
 const User = require('../models/User');
 
 let io;
+const activeStreams = new Map();
 
 const initializeSocket = (server) => {
     io = new Server(server, {
@@ -37,14 +38,40 @@ const initializeSocket = (server) => {
                 }
             });
 
-            socket.on('live-stream-start', ({ streamerId, streamData }) => {
+            socket.on('live-stream-start', ({ streamerId, streamData, notification }) => {
+                console.log('Live stream start event received:', {
+                    streamerId,
+                    streamData,
+                    notification
+                });
+
+                // Store stream information
+                activeStreams.set(streamerId, {
+                    streamData,
+                    startTime: Date.now(),
+                    isActive: true
+                });
+                console.log('Active streams:', Array.from(activeStreams.keys()));
+
                 // Join streamer to their own room
                 socket.join(`stream-${streamerId}`);
+                console.log(`Streamer ${streamerId} joined room: stream-${streamerId}`);
                 
-                // Notify followers/friends based on visibility
-                socket.broadcast.emit('new-live-stream', { 
-                    streamerId, 
-                    streamData 
+                // Broadcast stream data to the room
+                io.to(`stream-${streamerId}`).emit('stream-data', streamData);
+                
+                // Broadcast notification to all clients
+                socket.broadcast.emit('notification', {
+                    notification: {
+                        actionType: 'live_stream',
+                        message: streamData.text || 'Started a live stream',
+                        actorId: { _id: streamerId },
+                        status: 'pending',
+                        createdAt: new Date(),
+                        _id: `live-${Date.now()}-${streamerId}`
+                    },
+                    streamerId,
+                    streamData
                 });
             });
 
@@ -54,11 +81,16 @@ const initializeSocket = (server) => {
             });
 
             socket.on('join-stream', ({ streamerId }) => {
+                console.log(`User ${socket.id} joining stream:`, streamerId);
                 socket.join(`stream-${streamerId}`);
-                // Optionally notify streamer about new viewer
-                socket.to(`stream-${streamerId}`).emit('viewer-joined', { 
-                    viewerId: socket.handshake.query.userId 
-                });
+                
+                const streamInfo = activeStreams.get(streamerId);
+                if (streamInfo?.isActive) {
+                    console.log('Stream is active, sending data to new viewer');
+                    socket.emit('stream-data', streamInfo.streamData);
+                } else {
+                    console.log('Stream not active for viewer join');
+                }
             });
 
             socket.on('leave-stream', ({ streamerId }) => {
@@ -70,15 +102,23 @@ const initializeSocket = (server) => {
             });
 
             socket.on('live-stream-end', ({ streamerId }) => {
-                // Notify all viewers in the stream room that stream has ended
-                io.to(`stream-${streamerId}`).emit('stream-ended', { streamerId });
-                // Clean up the room
-                const room = io.sockets.adapter.rooms.get(`stream-${streamerId}`);
-                if (room) {
-                    for (const clientId of room) {
-                        io.sockets.sockets.get(clientId).leave(`stream-${streamerId}`);
-                    }
-                }
+                console.log(`Stream ended for ${streamerId}`);
+                activeStreams.delete(streamerId);
+                io.to(`stream-${streamerId}`).emit('stream-ended');
+            });
+
+            socket.on('check-stream-status', ({ streamerId }, callback) => {
+                console.log('Checking stream status for:', streamerId);
+                console.log('Active streams:', Array.from(activeStreams.keys()));
+                
+                const streamInfo = activeStreams.get(streamerId);
+                const response = {
+                    isActive: streamInfo?.isActive || false,
+                    streamData: streamInfo?.streamData
+                };
+                
+                console.log('Sending stream status response:', response);
+                callback(response);
             });
         }
     });

@@ -4,6 +4,7 @@ import socketService from '../../../config/socket';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PulseBubbleLoader } from "react-loaders-kit";
 import { formatDistanceToNow } from 'date-fns';
+import notify from '../../../utils/notify';
 
 const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
     const [notifications, setNotifications] = useState([]);
@@ -108,23 +109,43 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
     useEffect(() => {
         fetchNotifications();
 
-        socketService.on('notification', ({ notification, actor }) => {
+        socketService.on('notification', (data) => {
+            console.log('Received notification:', data);
+
+            // Handle both direct notifications and live stream notifications
+            const notificationData = data.notification || {
+                _id: Date.now(), // Temporary ID for live stream notifications
+                actionType: 'live_stream',
+                message: `${data.streamData?.text || 'Started a live stream'}`,
+                actorId: { _id: data.streamerId },
+                status: 'pending',
+                createdAt: new Date()
+            };
+
+            console.log('Processed notification data:', notificationData);
+
             setNotifications(prev => {
-                if (prev.some(n => n._id === notification._id)) {
+                // Check for duplicates using streamerId for live streams
+                const isDuplicate = prev.some(n => 
+                    (n._id === notificationData._id) || 
+                    (n.actionType === 'live_stream' && n.actorId?._id === data.streamerId)
+                );
+
+                if (isDuplicate) {
+                    console.log('Duplicate notification, skipping');
                     return prev;
                 }
-                return [{
-                    ...notification,
-                    actor,
-                    isNew: true
-                }, ...prev];
+
+                console.log('Adding new notification to list');
+                return [notificationData, ...prev];
             });
 
-            setTimeout(() => {
-                setNotifications(prev => 
-                    prev.map(n => n._id === notification._id ? { ...n, isNew: false } : n)
-                );
-            }, 3000);
+            setUnreadCount(prev => prev + 1);
+
+            // Show notification toast
+            if (data.streamData) {
+                notify(`Someone started a live stream!`, 'info');
+            }
         });
 
         return () => {
@@ -148,22 +169,33 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
     };
 
     const handleNotificationClick = async (notification) => {
-        if (notification.actionType === 'live_stream') {
-            // Navigate to live stream viewer
-            window.location.href = `/live/${notification.actorId._id}`;
-        }
         try {
-            await axiosInstance.put(`/notifications/${notification._id}/mark-read`);
-            setNotifications(prev => 
-                prev.map(notification => 
-                    notification._id === notification._id 
-                        ? { ...notification, status: 'read' }
-                        : notification
-                )
-            );
-            setUnreadCount(prev => Math.max(0, prev - 1));
+            console.log('Handling notification click:', notification);
+            
+            if (notification.actionType === 'live_stream') {
+                const streamerId = notification.actorId?._id;
+                if (streamerId) {
+                    console.log('Navigating to live stream:', streamerId);
+                    window.location.href = `/live/${streamerId}`;
+                } else {
+                    console.error('No streamerId found in notification');
+                }
+            }
+            
+            // Mark as read if it has an _id (not a temporary live stream notification)
+            if (notification._id) {
+                await axiosInstance.put(`/notifications/${notification._id}/mark-read`);
+                setNotifications(prev => 
+                    prev.map(n => 
+                        n._id === notification._id 
+                            ? { ...n, status: 'read' }
+                            : n
+                    )
+                );
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            }
         } catch (error) {
-            console.error('Error marking notification as read:', error);
+            console.error('Error handling notification click:', error);
         }
     };
 

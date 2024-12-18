@@ -1,5 +1,6 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const { createNotification } = require('../utils/notificationHelper');
 
 exports.getNotifications = async (req, res) => {
     const userId = req.user._id;
@@ -88,35 +89,54 @@ exports.createLiveStreamNotification = async (req, res) => {
     const { streamData } = req.body;
     const userId = req.user._id;
 
+    console.log('Creating live stream notification:', {
+        userId,
+        streamData
+    });
+
     try {
+        const user = await User.findById(userId)
+            .populate('followers')
+            .populate('friends');
+
+        console.log('Found user with followers:', {
+            username: user.username,
+            followersCount: user.followers.length,
+            friendsCount: user.friends.length
+        });
+
         let targetUsers = [];
 
-        // Determine target users based on visibility
         if (streamData.visibility === 'public') {
-            // Notify all followers
-            const user = await User.findById(userId);
-            targetUsers = user.followers;
+            targetUsers = user.followers.map(follower => follower._id);
+            console.log('Public stream - targeting followers:', targetUsers.length);
         } else if (streamData.visibility === 'friends') {
-            // Notify only friends
-            const user = await User.findById(userId);
-            targetUsers = user.friends;
+            targetUsers = user.friends.map(friend => friend._id);
+            console.log('Friends-only stream - targeting friends:', targetUsers.length);
         }
 
-        // Create notifications for all target users
+        console.log('Creating notifications for users:', targetUsers.length);
+
         const notifications = await Promise.all(
-            targetUsers.map(targetUserId =>
-                createNotification({
+            targetUsers.map(targetUserId => {
+                console.log('Creating notification for user:', targetUserId);
+                return createNotification({
                     userId: targetUserId,
                     actorId: userId,
                     actionType: 'live_stream',
-                    message: `${req.user.username} started a live stream: ${streamData.text}`,
-                    streamData
-                })
-            )
+                    message: `${user.username} started a live stream${streamData.text ? `: ${streamData.text}` : ''}`
+                });
+            })
         );
 
-        res.status(200).json({ message: 'Live stream notifications created' });
+        console.log('Successfully created notifications:', notifications.length);
+
+        res.status(200).json({ 
+            message: 'Live stream notifications created', 
+            notifications 
+        });
     } catch (error) {
+        console.error('Error creating live stream notifications:', error);
         res.status(500).json({ error: error.message });
     }
 };

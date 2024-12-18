@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import notify from '../../utils/notify';
-import socket from '../../config/socket';
+import socketService from '../../config/socket';
 import getUserIdFromToken from '../../utils/getUserIdFromToken';
 import SaveStreamModal from './SaveStreamModal';
 import axiosInstance from '../../config/axios';
@@ -58,7 +58,7 @@ export default function LiveStreamModal({ onClose }) {
             mediaRecorderRef.current.ondataavailable = (event) => {
                 if (event.data.size > 0) {
                     setRecordedChunks((prev) => [...prev, event.data]);
-                    socket.emit('live-stream-chunk', {
+                    socketService.emit('live-stream-chunk', {
                         chunk: event.data,
                         streamerId: userId,
                     });
@@ -74,25 +74,36 @@ export default function LiveStreamModal({ onClose }) {
     };
 
     const startRecording = (timeSlice = 500) => {
+        console.log('Starting recording with timeSlice:', timeSlice);
         setRecordedChunks([]);
         mediaRecorderRef.current.start(timeSlice);
         setIsRecording(true);
         
-        // Notify users about the stream
-        socket.emit('live-stream-start', {
+        // Update the structure of the emitted data
+        const streamData = {
+            text: "Started a live stream",
+            visibility: 'public'
+        };
+        
+        console.log('Emitting live-stream-start event');
+        
+        socketService.emit('live-stream-start', {
             streamerId: userId,
-            streamData: {
-                text: "Started a live stream",
-                visibility: 'public'
+            streamData,
+            notification: {
+                actionType: 'live_stream',
+                message: "Started a live stream",
+                actorId: userId
             }
         });
 
-        // Create notification
+        // Create notification through API
+        console.log('Creating live stream notification...');
         axiosInstance.post('/notifications/create-live-stream', {
-            streamData: {
-                text: "Started a live stream",
-                visibility: 'public'
-            }
+            streamData
+        }).catch(error => {
+            console.error('Error creating live stream notification:', error);
+            notify('Failed to notify users about the stream', 'error');
         });
     };
 
@@ -109,7 +120,7 @@ export default function LiveStreamModal({ onClose }) {
                 // Listen for the stop event to complete the process
                 mediaRecorderRef.current.addEventListener('stop', () => {
                     // Notify viewers that stream has ended
-                    socket.emit('live-stream-end', {
+                    socketService.emit('live-stream-end', {
                         streamerId: userId
                     });
 
