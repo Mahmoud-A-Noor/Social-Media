@@ -29,7 +29,16 @@ export default function LiveStreamViewer({ streamerId, streamData }) {
                 const chunk = queuedChunks.current.shift();
                 if (chunk instanceof Blob) {
                     const arrayBuffer = await chunk.arrayBuffer();
-                    sourceBufferRef.current.appendBuffer(arrayBuffer);
+                    try {
+                        sourceBufferRef.current.appendBuffer(arrayBuffer);
+                    } catch (appendError) {
+                        console.error('Error appending buffer:', appendError.message);
+                        if (appendError.name === 'QuotaExceededError') {
+                            queuedChunks.current.unshift(chunk);
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            break;
+                        }
+                    }
                     await new Promise(resolve => {
                         const handleUpdate = () => {
                             sourceBufferRef.current?.removeEventListener('updateend', handleUpdate);
@@ -40,9 +49,8 @@ export default function LiveStreamViewer({ streamerId, streamData }) {
                 }
             }
         } catch (error) {
-            if (error.name !== 'InvalidStateError') {
-                console.error('Error processing video chunk:', error);
-            }
+            console.error('Error processing video chunk:', error.message, error.name);
+            notify('Error processing video chunk', 'error');
         } finally {
             isProcessing.current = false;
             // Check if there are more chunks to process
@@ -65,20 +73,30 @@ export default function LiveStreamViewer({ streamerId, streamData }) {
             console.log('MediaSource opened');
             try {
                 if (!sourceBufferRef.current && mediaSourceRef.current.readyState === 'open') {
+                    console.log('isTypeSupported:', MediaSource.isTypeSupported('video/webm; codecs="vp8,opus"'));
+                    
                     sourceBufferRef.current = mediaSourceRef.current.addSourceBuffer('video/webm; codecs="vp8,opus"');
                     isSourceBufferActive.current = true;
                     setIsConnected(true);
 
                     sourceBufferRef.current.addEventListener('error', (e) => {
-                        console.error('SourceBuffer error:', e);
+                        console.error('SourceBuffer error:', {
+                            message: e.message,
+                            type: e.type,
+                            target: {
+                                mode: e.target.mode,
+                                updating: e.target.updating,
+                                timestampOffset: e.target.timestampOffset
+                            }
+                        });
                         isSourceBufferActive.current = false;
+                        notify('Video stream error occurred', 'error');
                     });
 
-                    // Process any chunks that arrived before initialization
                     processQueue();
                 }
             } catch (error) {
-                console.error('Error setting up SourceBuffer:', error);
+                console.error('Error setting up SourceBuffer:', error.message, error.name);
                 notify('Error initializing video player', 'error');
             }
         });

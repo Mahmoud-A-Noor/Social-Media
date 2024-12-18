@@ -73,37 +73,70 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
     };
 
     const renderNotificationContent = (notification) => {
-        const timeAgo = formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
-
-        return (
-            <div className="flex items-center justify-between w-full">
-                <div className="flex items-center space-x-3">
-                    <span className="text-2xl">
+        const actorName = notification.actorId?.username || 'Someone';
+        
+        switch (notification.actionType) {
+            case 'live_stream':
+                return (
+                    <div className="flex items-center space-x-2">
+                        <div className="flex-shrink-0">
+                            {getNotificationIcon(notification.actionType)}
+                        </div>
+                        <div>
+                            <p className="font-semibold">{actorName} started a live stream</p>
+                            <p className="text-sm text-gray-500">
+                                {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            </p>
+                        </div>
+                    </div>
+                );
+                
+            case 'comment':
+                return (
+                    <div className="flex items-center space-x-2">
+                        <div className="flex-shrink-0">
                         {getNotificationIcon(notification.actionType)}
-                    </span>
-                    <div className="flex flex-col">
-                        <p className="text-sm text-gray-800">{notification.message}</p>
-                        <span className="text-xs text-gray-500">{timeAgo}</span>
+                        </div>
+                        <div>
+                            <p className="font-semibold">{actorName} commented on your post</p>
+                            <p className="text-sm text-gray-500">
+                                {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            </p>
+                        </div>
                     </div>
-                </div>
-                {notification.actionType === 'friend_request' && notification.status === 'pending' && (
-                    <div className="flex space-x-2">
-                        <button
-                            onClick={() => handleFriendRequest(notification._id, true)}
-                            className="px-3 py-1 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                        >
-                            Accept
-                        </button>
-                        <button
-                            onClick={() => handleFriendRequest(notification._id, false)}
-                            className="px-3 py-1 text-sm text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300"
-                        >
-                            Decline
-                        </button>
+                );
+                
+            case 'reaction':
+                return (
+                    <div className="flex items-center space-x-2">
+                        <div className="flex-shrink-0">
+                        {getNotificationIcon(notification.actionType)}
+                        </div>
+                        <div>
+                            <p className="font-semibold">{actorName} reacted to your post</p>
+                            <p className="text-sm text-gray-500">
+                                {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            </p>
+                        </div>
                     </div>
-                )}
-            </div>
-        );
+                );
+                
+            // Add other notification types...
+            default:
+                return (
+                    <div className="flex items-center space-x-2">
+                        <div className="flex-shrink-0">
+                        {getNotificationIcon(notification.actionType)}
+                        </div>
+                        <div>
+                            <p className="font-semibold">{notification.message}</p>
+                            <p className="text-sm text-gray-500">
+                                {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            </p>
+                        </div>
+                    </div>
+                );
+        }
     };
 
     useEffect(() => {
@@ -172,14 +205,41 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
         try {
             console.log('Handling notification click:', notification);
             
-            if (notification.actionType === 'live_stream') {
-                const streamerId = notification.actorId?._id;
-                if (streamerId) {
-                    console.log('Navigating to live stream:', streamerId);
-                    window.location.href = `/live/${streamerId}`;
-                } else {
-                    console.error('No streamerId found in notification');
-                }
+            // Handle different notification types
+            switch (notification.actionType) {
+                case 'live_stream':
+                    const streamerId = notification.actorId?._id;
+                    if (streamerId) {
+                        window.location.href = `/live/${streamerId}`;
+                    }
+                    break;
+                    
+                case 'comment':
+                case 'reaction':
+                case 'share':
+                    //TODO (create page for post) Navigate to the post
+                    if (notification.postId) {
+                        window.location.href = `/post/${notification.postId}`;
+                    }
+                    break;
+                    
+                case 'friend_request':
+                    //TODO (should be edited) Navigate to friend requests page or handle in-place
+                    window.location.href = `/friends/requests`;
+                    break;
+                    
+                case 'follow':
+                case 'unfollow':
+                case 'unfriend':
+                case 'block':
+                    //TODO (create page for profile) Navigate to user profile
+                    if (notification.actorId?._id) {
+                        window.location.href = `/profile/${notification.actorId._id}`;
+                    }
+                    break;
+                    
+                default:
+                    console.warn('Unknown notification type:', notification.actionType);
             }
             
             // Mark as read if it has an _id (not a temporary live stream notification)
