@@ -89,30 +89,6 @@ export default function RightPart() {
         };
     }, []);
 
-
-    useEffect(() => {
-        // Fetch initial unread count
-        const fetchUnreadCount = async () => {
-            try {
-                const response = await axiosInstance.get('/notifications/unread-count');
-                setUnreadCount(response.data.count);
-            } catch (error) {
-                console.error('Error fetching unread count:', error);
-            }
-        };
-
-        fetchUnreadCount();
-
-        // Listen for new notifications
-        socketService.on('notification', () => {
-            setUnreadCount(prev => prev + 1);
-        });
-
-        return () => {
-            socketService.off('notification');
-        };
-    }, []);
-
     
 
     return (

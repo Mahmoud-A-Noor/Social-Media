@@ -139,8 +139,18 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
         }
     };
 
+    const fetchUnreadCount = async () => {
+        try {
+            const response = await axiosInstance.get('/notifications/unread-count');
+            setUnreadCount(response.data.count);
+        } catch (error) {
+            console.error('Error fetching unread count:', error);
+        }
+    };
+
     useEffect(() => {
         fetchNotifications();
+        fetchUnreadCount()
 
         socketService.on('notification', (data) => {
             console.log('Received notification:', data);
