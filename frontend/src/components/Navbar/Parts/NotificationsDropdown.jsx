@@ -105,12 +105,12 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
                         </div>
                     </div>
                 );
-                
+
             case 'reaction':
                 return (
                     <div className="flex items-center space-x-2">
                         <div className="flex-shrink-0">
-                        {getNotificationIcon(notification.actionType)}
+                            {getNotificationIcon(notification.actionType)}
                         </div>
                         <div>
                             <p className="font-semibold">{actorName} reacted to your post</p>
@@ -120,7 +120,47 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
                         </div>
                     </div>
                 );
-                
+
+            case 'friend_request':
+                return (
+                    <div className="space-x-2">
+                        <div className="flex-shrink-0">
+                            {/*{getNotificationIcon(notification.actionType)}*/}
+                            <div className="flex items-center space-x-2 w-full">
+                                <img className="rounded-full size-12"
+                                     src={notification.actorId?.profileImage ? notification.actorId.profileImage : "/src/assets/person.png"}
+                                     alt=""/>
+                                <p className="font-semibold">{actorName} sent you a friend request</p>
+                            </div>
+                        </div>
+                        <div>
+                            {
+                                notification.status === "pending" ? (
+                                    <div className="w-full">
+                                        <div className="flex items-center space-x-2 w-full">
+                                            <button className="form-button flex-1 text-white hover:text-white bg-green-500 hover:bg-green-600" onClick={()=>{
+                                                handleFriendRequest(notification._id, true);
+                                            }}>Accept</button>
+                                            <button className="form-button flex-1 text-white hover:text-white bg-red-500 hover:bg-red-600" onClick={()=>{
+                                                handleFriendRequest(notification._id, false);
+                                            }}>Decline</button>
+                                        </div>
+                                    </div>
+                                ) : notification.status === "accepted" ? (
+                                    <p className="font-semibold text-green-500 text-center mt-2">You accepted {actorName}'s friend request</p>
+                                ) : (
+                                    <p className="font-semibold text-red-500 text-center mt-2">You declined {actorName}'s friend request</p>
+                                )
+                            }
+
+                        <p className="text-sm text-gray-500">
+                            {formatDistanceToNow(new Date(notification.createdAt), {addSuffix: true})}
+                        </p>
+                    </div>
+            </div>
+            )
+                ;
+
             // Add other notification types...
             default:
                 return (
@@ -190,20 +230,34 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
                 notify(`Someone started a live stream!`, 'info');
             }
         });
+        socketService.on('friend-request-respond', async (data) => {
+            try{
+                setNotifications(prev => prev.map(notif =>
+                    notif._id === data.notificationId
+                        ? {...notif, status: data.accept ? 'accepted' : 'declined'}
+                        : notif
+                ));
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            }catch (error) {
+                console.log('Error updating notification:', error);
+            }
+        })
 
         return () => {
             socketService.off('notification');
+            socketService.off('friend-request-respond');
         };
     }, []);
 
     const markAllAsRead = async () => {
         try {
             await axiosInstance.put('/notifications/mark-read');
-            setNotifications(prev => 
-                prev.map(notification => ({ 
-                    ...notification, 
-                    status: 'read' 
-                }))
+            setNotifications(prev =>
+                prev.map(notification =>
+                    notification.actionType !== 'friend_request'
+                        ? { ...notification, status: 'read' }
+                        : notification
+                )
             );
             setUnreadCount(0);
         } catch (error) {
@@ -232,10 +286,10 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
                         window.location.href = `/post/${notification.postId}`;
                     }
                     break;
-                    
+
                 case 'friend_request':
                     //TODO (should be edited) Navigate to friend requests page or handle in-place
-                    window.location.href = `/friends/requests`;
+                    // window.location.href = `/friends/requests`;
                     break;
                     
                 case 'follow':
@@ -253,7 +307,7 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
             }
             
             // Mark as read if it has an _id (not a temporary live stream notification)
-            if (notification._id) {
+            if (notification._id && notification.actionType !== 'friend_request') {
                 await axiosInstance.put(`/notifications/${notification._id}/mark-read`);
                 setNotifications(prev => 
                     prev.map(n => 

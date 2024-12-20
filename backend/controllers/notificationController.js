@@ -2,6 +2,7 @@ const Notification = require('../models/Notification');
 const User = require('../models/User');
 const { createNotification } = require('../utils/notificationHelper');
 
+
 exports.getNotifications = async (req, res) => {
     const userId = req.user._id;
     const page = parseInt(req.query.page) || 1;
@@ -9,7 +10,7 @@ exports.getNotifications = async (req, res) => {
     
     try {
         const notifications = await Notification.find({ user: userId })
-            .populate('actorId', 'username profilePicture')
+            .populate('actorId', 'username profileImage')
             .populate('postId', 'text')
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
@@ -32,22 +33,9 @@ exports.getUnreadCount = async (req, res) => {
     try {
         const count = await Notification.countDocuments({ 
             user: userId, 
-            isRead: false 
+            status: "pending"
         });
         res.status(200).json({ count });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-exports.markNotificationsAsRead = async (req, res) => {
-    const userId = req.user._id;
-    try {
-        await Notification.updateMany(
-            { user: userId, isRead: false },
-            { isRead: true }
-        );
-        res.status(200).json({ message: 'Notifications marked as read' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -76,7 +64,7 @@ exports.markAsRead = async (req, res) => {
 exports.markAllAsRead = async (req, res) => {
     try {
         await Notification.updateMany(
-            { user: req.user._id, status: { $ne: 'read' } },
+            { user: req.user._id, status: { $ne: 'read' }, actionType: { $ne: "friend_request" } },
             { status: 'read' }
         );
         res.status(200).json({ message: 'All notifications marked as read' });

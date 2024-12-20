@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const {body} = require("express-validator");
 
 
 exports.getUserStatus = async (req, res) => {
@@ -11,6 +12,53 @@ exports.getUserStatus = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+
+exports.getOnlineFriends = async (req, res) => {
+    try {
+        const currentUser = req.user; // Assuming user is available in the request, e.g., through authentication middleware
+
+        // Fetch online friends
+        const onlineFriends = await User.find({
+            _id: { $in: currentUser.friends }, // Filter friends by their IDs
+            status: 'online' // Ensure only online users are fetched
+        }).select('username profileImage'); // Select only required fields
+
+        res.status(200).json(onlineFriends);
+    } catch (error) {
+        console.error('Error fetching online friends:', error);
+        res.status(500).json({
+            message: 'Failed to fetch online friends'
+        });
+    }
+};
+
+exports.getOnlineFriend = async (req, res) => {
+    const { friendId } = req.body; // Get the friendId from the route parameter
+    try {
+        const currentUser = req.user; // Assuming the user is authenticated and available in req.user
+
+        // Check if the friendId exists in the current user's friends list
+        const friend = await User.findOne({
+            _id: friendId,
+            _id: { $in: currentUser.friends }, // Ensure the user is in the current user's friends list
+            status: 'online' // Ensure the friend is online
+        }).select('username profileImage'); // Select only necessary fields
+
+        if (!friend) {
+            return res.status(404).json({
+                message: 'Friend not found or not online'
+            });
+        }
+
+        res.status(200).json(friend); // Return the online friend data
+    } catch (error) {
+        console.error('Error fetching online friend:', error);
+        res.status(500).json({
+            message: 'Failed to fetch online friend'
+        });
+    }
+};
 
 exports.getMyData = async (req, res) => {
     try {

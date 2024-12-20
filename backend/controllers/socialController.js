@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 const { createNotification } = require('../utils/notificationHelper');
+const { getIoInstance } = require('../config/socket');
+
 
 exports.followUser = async (req, res) => {
     const { userId } = req.body;
@@ -60,6 +62,24 @@ exports.unfollowUser = async (req, res) => {
     }
 };
 
+exports.getFriendRequests = async (req, res) => {
+    const currentUser = req.user;
+
+    try {
+        const friendRequests = await Notification.find({
+            user: currentUser._id,
+            actionType: 'friend_request',
+            status: 'pending'
+        })
+            .populate('actorId', 'username profileImage');
+
+        res.status(200).json(friendRequests);
+    } catch (error) {
+        console.error('Error fetching friend requests:', error);
+        res.status(500).json({ error: 'Failed to fetch friend requests' });
+    }
+};
+
 exports.sendFriendRequest = async (req, res) => {
     const { userId } = req.body;
     const currentUser = req.user;
@@ -73,7 +93,7 @@ exports.sendFriendRequest = async (req, res) => {
             return res.status(400).json({ message: 'You are already friends with this user' });
         }
 
-        // Check if there's already a pending request
+        // Check if there's already a pending 3
         const existingRequest = await Notification.findOne({
             $or: [
                 { user: userId, actorId: currentUser._id },
@@ -105,6 +125,7 @@ exports.sendFriendRequest = async (req, res) => {
 exports.respondToFriendRequest = async (req, res) => {
     const { notificationId, userId, accept } = req.body;
     const currentUser = req.user;
+    const io = getIoInstance();
 
     try {
         let notification;
@@ -147,17 +168,12 @@ exports.respondToFriendRequest = async (req, res) => {
                 requestingUser.friends.push(currentUser._id);
             }
             await Promise.all([currentUser.save(), requestingUser.save()]);
-
-            // Notify the requesting user
-            await createNotification({
-                userId: notification.actorId._id,
-                actorId: currentUser._id,
-                actionType: 'friend_request',
-                message: `${currentUser.username} accepted your friend request`,
-                status: 'accepted'
-            });
         }
-
+        // Emit notification
+        io.to(userId).emit('friend-request-respond', {
+            notificationId: notification._id,
+            accept
+        });
         res.status(200).json({ message: accept ? 'Friend request accepted' : 'Friend request declined' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -232,7 +248,6 @@ exports.unfriend = async (req, res) => {
     }
 };
 
-// Optional: Add unblock functionality
 exports.unblockUser = async (req, res) => {
     const { userId } = req.body;
     const currentUser = req.user;

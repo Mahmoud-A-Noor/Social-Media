@@ -11,6 +11,9 @@ router.delete('/unfollow', socialController.unfollowUser);
 // Route for adding a friend
 router.post('/friend-request', socialController.sendFriendRequest);
 
+// Route for getting a friend requests
+router.get('/get-friend-requests', socialController.getFriendRequests);
+
 // Route to respond to friend request
 router.post('/respond-friend-request', socialController.respondToFriendRequest);
 

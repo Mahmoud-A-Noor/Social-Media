@@ -14,7 +14,7 @@ mongoose.connect(process.env.MONGO_URI, {
   const server = http.createServer(app);
   console.log('HTTP server started');
 
-  const io = initializeSocket(server);
+  initializeSocket(server);
   console.log('Socket Initialized');
 
 

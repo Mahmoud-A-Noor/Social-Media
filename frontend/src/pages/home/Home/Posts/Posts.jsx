@@ -25,19 +25,17 @@ export default function Posts() {
     const fetchPosts = async () => {
         try {
             const response = await axiosInstance.get(`/posts?page=${page}&limit=${limit}`);
-            const newPosts = response.data;
+            const {postsWithFollowStatus, hasMorePosts} = response.data;
 
             // Use functional state update to ensure up-to-date posts
             setPosts((prevPosts) => {
-                const filteredPosts = newPosts.filter(post => {
+                const filteredPosts = postsWithFollowStatus.filter(post => {
                     // Allow duplicate posts only if they are shared
                     const isDuplicate = prevPosts.some(existingPost => existingPost._id === post._id);
                     return !isDuplicate || post.shares && post.shares.length > 0; // Allow shared posts to appear twice
                 }).filter(post => !hiddenPosts.includes(post._id));
 
-                if (filteredPosts.length < limit) {
-                    setHasMore(false); // If less than {limit} posts, no more posts available
-                }
+                setHasMore(hasMorePosts);
 
                 return [...prevPosts, ...filteredPosts];
             });

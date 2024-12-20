@@ -65,7 +65,7 @@ exports.getPosts = async (req, res) => {
             delete post.author.followers;
         });
 
-        res.json(postsWithFollowStatus);
+        res.json({postsWithFollowStatus, hasMorePosts: postsWithFollowStatus.length >= limit});
     } catch (error) {
         console.error('Error fetching posts:', error);
         res.status(500).json({ error: 'Error fetching posts' });
