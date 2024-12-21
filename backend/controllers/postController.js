@@ -72,6 +72,47 @@ exports.getPosts = async (req, res) => {
     }
 };
 
+exports.getPost = async (req, res) => {
+    const {postId} = req.params
+    console.log(postId);
+
+    try {
+        const post = await Post.findById(postId)
+            .populate({
+                path: 'author',
+                select: 'username profileImage followers'
+            })
+            .populate('reactions')
+            .populate('comments')
+            .populate({
+                path: 'shares',
+                populate: {
+                    path: 'user',
+                    select: 'username profileImage'
+                }
+            })
+            .lean(); // Convert to plain JavaScript object for modification
+
+        // Add isFollowing field to each post's author
+        const postWithFollowStatus = {
+            ...post,
+            author: {
+                ...post.author,
+                isFollowing: post.author.followers.some(
+                    followerId => followerId.toString() === currentUserId.toString()
+                )
+            }
+        };
+
+        delete postWithFollowStatus.author.followers;
+
+        res.status(200).json(postWithFollowStatus);
+    } catch (error) {
+        console.error('Error fetching post:', error);
+        res.status(500).json({ error: 'Error fetching post' });
+    }
+};
+
 exports.deletePost = async (req, res) => {
     const { postId } = req.body;
     try {

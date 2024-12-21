@@ -231,6 +231,7 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
             }
         });
         socketService.on('friend-request-respond', async (data) => {
+            console.log('Received friend request-respond:', data);
             try{
                 setNotifications(prev => prev.map(notif =>
                     notif._id === data.notificationId
@@ -364,8 +365,8 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
                             onClick={() => handleNotificationClick(notification)}
                             className={`
                                 p-4 border-b transition-all duration-300 cursor-pointer
-                                ${notification.status !== 'read' ? 'bg-blue-50' : 'bg-white'}
-                                ${notification.isNew ? 'animate-pulse bg-green-50' : ''}
+                                ${notification.status === 'read' || notification.status === 'accepted' || notification.status === 'declined' ? 'bg-white' : 'bg-blue-50'}
+                                ${notification.status === "pending" ? 'animate-pulse bg-green-50' : ''}
                                 hover:bg-gray-50
                             `}
                         >

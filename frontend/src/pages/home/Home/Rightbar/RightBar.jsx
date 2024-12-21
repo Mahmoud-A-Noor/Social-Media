@@ -3,11 +3,13 @@ import axiosInstance from "../../../../config/axios.js";
 import notify from "../../../../utils/notify.js"
 import {FillCircleLoader} from "react-loaders-kit";
 import socketService from "../../../../config/socket.js";
+import getUserIdFromToken from "../../../../utils/getUserIdFromToken.js";
 
 export default function RightBar() {
     const [friendRequests, setFriendRequests] = useState([]);
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
+
 
     const handleFriendRequest = async (userId, accept) => {
         try {
@@ -31,7 +33,7 @@ export default function RightBar() {
         try {
             setLoading(true);
             const response = await axiosInstance.get("social/get-friend-requests")
-            setFriends(response.data);
+            setFriendRequests(response.data);
         } catch (err) {
             notify('Failed to fetch friend requests', "error");
         } finally {
@@ -54,8 +56,11 @@ export default function RightBar() {
 
 
     useEffect(() => {
+        fetchFriendRequests();
+        fetchOnlineFriends()
 
         socketService.on('user-status-change', ({ id, status }) => {
+            if(id !== getUserIdFromToken(localStorage.getItem("accessToken")))
             setFriends((prevFriends) => {
                 // If the user is online and not in the friends list, fetch them from the backend
                 if (status === 'online') {
@@ -68,7 +73,7 @@ export default function RightBar() {
                                 setFriends(prev => [...prev, response.data]); // Add to state
                             })
                             .catch(error => {
-                                notify('Error fetching online friend:' + error, "error");
+                                console.log('Error fetching online friend:', error);
                             });
                     }
                 } else if (status === 'offline') {
@@ -78,16 +83,21 @@ export default function RightBar() {
                 return prevFriends;
             });
         });
-
-        fetchFriendRequests();
-        fetchOnlineFriends()
+        socketService.on('notification', (data) =>{
+            if(data.notification.actionType === "friend-request")
+            fetchFriendRequests();
+        });
 
         return () => {
             socketService.off('user-status-change');
         };
     }, []);
 
-    if (loading) return <FillCircleLoader loading={loading} size={17} />
+    if (loading) return (
+        <div className="h-screen w-[27rem] flex items-center justify-center">
+            <FillCircleLoader loading={loading} size={47} />
+        </div>
+    )
 
 
     return (
@@ -132,9 +142,9 @@ export default function RightBar() {
                 <div className="bg-white rounded-lg shadow-md p-3">
                     <h5 className="mb-3 text-lg font-semibold text-gray-500">Online Users</h5>
                     <div className="overflow-y-scroll max-h-[41vh]">
-                        {friends.map((friend) => {
+                        {friends.map((friend, index) => {
                             return (
-                                <div className="flex items-center px-1 py-2 cursor-pointer hover:bg-white">
+                                <div key={index} className="flex items-center px-1 py-2 cursor-pointer hover:bg-white">
                                     <div className="relative">
                                         <img className="rounded-full size-12"
                                              src={friend.profileImage ? friend.profileImage : "/src/assets/person.png"}
@@ -145,6 +155,7 @@ export default function RightBar() {
                                             className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full"></span>
                                     </div>
                                     <h5 className="text-lg ms-2">{friend.username}</h5>
+
                                 </div>
                             )
                         })}

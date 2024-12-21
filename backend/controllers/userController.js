@@ -13,7 +13,6 @@ exports.getUserStatus = async (req, res) => {
     }
 }
 
-
 exports.getOnlineFriends = async (req, res) => {
     try {
         const currentUser = req.user; // Assuming user is available in the request, e.g., through authentication middleware

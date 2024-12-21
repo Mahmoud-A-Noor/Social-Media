@@ -12,6 +12,7 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const messageRoutes = require("./routes/MessageRoutes");
 const chatRoutes = require('./routes/chatRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 
 const cors = require('cors');
 
@@ -43,6 +44,7 @@ app.use('/notifications', notificationRoutes);
 app.use('/file', fileRoutes);
 app.use('/messages', messageRoutes);
 app.use('/chats', chatRoutes);
+app.use('/profile', profileRoutes);
 
 
 app.use(errorHandler);

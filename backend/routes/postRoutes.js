@@ -10,6 +10,7 @@ router.post('/save', postController.savePost);
 router.post('/hide', postController.hidePost);
 router.post('/share', postController.sharePost);
 router.get('/', postController.getPosts);                  // Get posts
+router.get('/post/:postId', postController.getPost);                  // Get post
 router.delete('/', postController.deletePost);        // Delete a post
 router.put('/', postController.updatePost);
 

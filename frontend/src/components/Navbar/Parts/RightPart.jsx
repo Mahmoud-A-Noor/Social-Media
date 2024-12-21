@@ -22,8 +22,12 @@ import { MdDarkMode } from "react-icons/md";
 import { MdFeedback } from "react-icons/md";
 import { GiEntryDoor } from "react-icons/gi";
 import { IoIosArrowForward } from "react-icons/io";
+import {useAuth} from "../../../context/authContext.jsx";
 
 export default function RightPart() {
+
+    const {logout} = useAuth();
+
     const [isImageDropdownOpen, setIsImageDropdownOpen] = useState(false)
     const [isNavMenuDropdownOpen, setIsNavMenuDropdownOpen] = useState(false)
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
@@ -224,7 +228,7 @@ export default function RightPart() {
                                     <IoIosArrowForward className="" />
                                 </div>
                             </div>
-                            <div className="flex flex-row items-center justify-between px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
+                            <div className="flex flex-row items-center justify-between px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100" onClick={logout}>
                                 <div className="flex flex-row items-center">
                                     <div className="p-2 bg-gray-200 rounded-full me-2">
                                         <GiEntryDoor className="text-xl" />
