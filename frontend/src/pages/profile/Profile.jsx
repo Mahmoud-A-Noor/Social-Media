@@ -6,12 +6,13 @@ import getUserIdFromToken from "../../utils/getUserIdFromToken.js";
 import MediaViewer from "../../components/Media/MediaViewer.jsx";
 import notify from "../../utils/notify.js"
 import uploadFile from "../../utils/uploadFile.js"
+import {useAuth} from "../../context/authContext.jsx";
 
 
 export default function Profile(){
     const { profileId } = useParams();
     const [activeTab, setActiveTab] = useState('posts');
-    const [user, setUser] = useState(null);
+    const {user, setUser} = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [file, setFile] = useState(null);
     const [editForm, setEditForm] = useState({
@@ -169,8 +170,8 @@ export default function Profile(){
                         {friends.map(friend => (
                             <a href={`/profile/${friend._id}`} key={friend._id} className="border rounded p-4 text-center">
                                 <img
-                                    src={friend.profileImage || '/src/assets/person.png'}
-                                    alt={friend.username}
+                                    src={friend?.profileImage || '/src/assets/person.png'}
+                                    alt={friend?.username}
                                     className="w-20 h-20 rounded-full mx-auto"
                                 />
                                 <p className="mt-2 font-medium">{friend.username}</p>
@@ -184,8 +185,8 @@ export default function Profile(){
                         {followers.map(follower => (
                             <a href={`/profile/${follower._id}`} key={follower._id} className="border rounded p-4 text-center">
                                 <img
-                                    src={follower.profileImage || '/src/assets/person.png'}
-                                    alt={follower.username}
+                                    src={follower?.profileImage || '/src/assets/person.png'}
+                                    alt={follower?.username}
                                     className="w-20 h-20 rounded-full mx-auto"
                                 />
                                 <p className="mt-2 font-medium">{follower.username}</p>
@@ -207,8 +208,8 @@ export default function Profile(){
             <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="flex items-center space-x-6">
                     <img
-                        src={user.profileImage || '/src/assets/person.png'}
-                        alt={user.username}
+                        src={user?.profileImage || '/src/assets/person.png'}
+                        alt={user?.username}
                         className="w-32 h-32 rounded-full"
                     />
                     <div>

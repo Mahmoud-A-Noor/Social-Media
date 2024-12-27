@@ -3,10 +3,12 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import notify from "../../../../../../utils/notify.js";
 import axiosInstance from "../../../../../../config/axios.js";
 import {CircleFadeLoader} from "react-loaders-kit";
+import {useAuth} from "../../../../../../context/authContext.jsx";
 
 const Comments = ({ postId, comments, setComments }) => {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+    const {user} = useAuth();
 
     // Load initial comments
     useEffect(() => {
@@ -150,7 +152,7 @@ const Comments = ({ postId, comments, setComments }) => {
                 {comments.map((comment) => (
                     <div key={comment._id} style={{ marginBottom: '20px', borderBottom: '1px solid #ccc' }}>
                         <div className="flex items-start justify-start">
-                            <img className="rounded-full size-12 me-2" src="/src/assets/person.png" alt=""/>
+                            <img className="rounded-full size-12 me-2" src={user?.profileImage || "/src/assets/person.png"} alt=""/>
                             <div className="flex-1 p-4 mb-4 bg-gray-200 rounded shadow">
                                 {/* Comment Text */}
                                 <p className="font-semibold text-gray-800">{comment.user.username}</p>

@@ -9,7 +9,7 @@ import {usePostContext} from "../../../../context/CreatePostContext.jsx";
 
 export default function CreatePostFormModal(){
 
-    const {textAreaRef, emojiPickerButtonRef, emojiPickerRef, isEmojiPickerOpen, setIsEmojiPickerOpen, isModalOpen, setIsModalOpen, handleFileSelect, feeling, file, setFile, setFileUrl, postVisibility, setPostVisibility, postContent, setPostContent } = usePostContext()
+    const {user, textAreaRef, emojiPickerButtonRef, emojiPickerRef, isEmojiPickerOpen, setIsEmojiPickerOpen, isModalOpen, setIsModalOpen, handleFileSelect, feeling, file, setFile, setFileUrl, postVisibility, setPostVisibility, postContent, setPostContent } = usePostContext()
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -77,7 +77,7 @@ export default function CreatePostFormModal(){
             }} header="Create Post" width="37rem">
                 <div className="flex items-center mt-2 gap-2">
                     <div className="size-10">
-                        <img className="w-full h-full rounded-full " src="/src/assets/person.png" alt=""/>
+                        <img className="w-full h-full rounded-full " src={user?.profileImage || "/src/assets/person.png"} alt=""/>
                     </div>
                     <div>
                         <h4 className="text-base font-semibold">Mahmoud Noor {feeling && renderFeelingText()}</h4>

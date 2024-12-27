@@ -8,14 +8,18 @@ import { VscFeedback } from "react-icons/vsc";
 import { GiConsoleController } from "react-icons/gi";
 import { RxActivityLog } from "react-icons/rx";
 import { TbMessageFilled } from "react-icons/tb";
+import {useAuth} from "../../../../context/authContext.jsx";
 
 
 export default function SidebarContent() {
+
+    const {user} = useAuth()
+
     return (
         <div>
             <div className="flex items-center px-2 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <div className="size-10">
-                    <img src="/src/assets/person.png" alt="no image" className="w-full h-full rounded-full" />
+                    <img src={user?.profileImage || "/src/assets/person.png"} alt="no image" className="w-full h-full rounded-full" />
                 </div>
                 <h4 className="text-lg ms-3">Maria John</h4>
             </div>

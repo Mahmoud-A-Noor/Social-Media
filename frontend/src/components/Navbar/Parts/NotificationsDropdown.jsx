@@ -128,7 +128,7 @@ const NotificationsDropdown = ({ isOpen, setUnreadCount }) => {
                             {/*{getNotificationIcon(notification.actionType)}*/}
                             <div className="flex items-center space-x-2 w-full">
                                 <img className="rounded-full size-12"
-                                     src={notification.actorId?.profileImage ? notification.actorId.profileImage : "/src/assets/person.png"}
+                                     src={notification?.actorId?.profileImage || "/src/assets/person.png"}
                                      alt=""/>
                                 <p className="font-semibold">{actorName} sent you a friend request</p>
                             </div>

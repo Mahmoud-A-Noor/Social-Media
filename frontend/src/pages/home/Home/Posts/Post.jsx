@@ -75,8 +75,8 @@ export default function Post({post, hidePostFromList, updatePostReactions}) {
                     <div className="size-12">
                         <img 
                             className="w-full h-full rounded-full" 
-                            src={post.author.profileImage || "/src/assets/person.png"} 
-                            alt={post.author.username}
+                            src={post?.author?.profileImage || "/src/assets/person.png"}
+                            alt={post?.author?.username}
                         />
                     </div>
                     <div className="ms-2">

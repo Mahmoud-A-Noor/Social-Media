@@ -111,7 +111,7 @@ export default function RightBar() {
                         <div key={index}>
                             <div className="flex items-center space-x-2 w-full">
                                 <img className="rounded-full size-12"
-                                     src={friendRequest.actorId?.profileImage ? friendRequest.actorId.profileImage : "/src/assets/person.png"}
+                                     src={friendRequest?.actorId?.profileImage || "/src/assets/person.png"}
                                      alt=""/>
                                 <p className="font-semibold">{friendRequest.actorId.username}</p>
                             </div>
@@ -147,7 +147,7 @@ export default function RightBar() {
                                 <div key={index} className="flex items-center px-1 py-2 cursor-pointer hover:bg-white">
                                     <div className="relative">
                                         <img className="rounded-full size-12"
-                                             src={friend.profileImage ? friend.profileImage : "/src/assets/person.png"}
+                                             src={friend?.profileImage || "/src/assets/person.png"}
                                              alt=""/>
                                         <span
                                             className="absolute top-0 right-0 w-3 h-3 bg-green-400 rounded-full opacity-75 animate-ping"></span>
