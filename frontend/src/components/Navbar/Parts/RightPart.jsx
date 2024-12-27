@@ -23,10 +23,12 @@ import { MdFeedback } from "react-icons/md";
 import { GiEntryDoor } from "react-icons/gi";
 import { IoIosArrowForward } from "react-icons/io";
 import {useAuth} from "../../../context/authContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function RightPart() {
 
-    const {logout} = useAuth();
+    const {logout, user} = useAuth();
+    const navigate = useNavigate();
 
     const [isImageDropdownOpen, setIsImageDropdownOpen] = useState(false)
     const [isNavMenuDropdownOpen, setIsNavMenuDropdownOpen] = useState(false)
@@ -181,7 +183,9 @@ export default function RightPart() {
             <div className="relative mx-2 size-9">
                 <img ref={imageDropdownButtonRef} src="/src/assets/person.png" alt="no image" className="w-full h-full rounded-full cursor-pointer" onClick={toggleImageDropdown} />
                 {isImageDropdownOpen &&
-                    <div ref={imageDropdownRef} className="absolute w-[23em] h-[26.5em] top-[2.5em] -left-[20.5em] shadow-[0px_0px_5px_0.1px_rgba(0,_0,_0,_0.75)] bg-white p-3 divide-y divide-gray-300 rounded-md z-[99999]">
+                    <div ref={imageDropdownRef} className="absolute w-[23em] h-[26.5em] top-[2.5em] -left-[20.5em] shadow-[0px_0px_5px_0.1px_rgba(0,_0,_0,_0.75)] bg-white p-3 divide-y divide-gray-300 rounded-md z-[99999]" onClick={()=>{
+                        navigate(`/profile/${user._id}`)
+                    }}>
                         <div className="flex items-center w-full p-2 mt-2 mb-4 border border-gray-400 rounded-lg cursor-pointer hover:bg-gray-200">
                             <img src="/src/assets/person.png" alt="no image" className="rounded-full size-9 me-2" />
                             <h5 className="text-base font-semibold">Maria John</h5>

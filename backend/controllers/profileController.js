@@ -67,17 +67,34 @@ exports.updateProfile = async (req, res) => {
         }
 
         const { username, email, profileImage } = req.body;
+        const updates = {};
 
-        // Find user and update
+        // Check if the username or email already exists and belongs to another user
+        if (username) {
+            const existingUserByUsername = await User.findOne({ username });
+            if (existingUserByUsername && existingUserByUsername.id !== req.user.id) {
+                return res.status(400).json({ message: 'Username already taken' });
+            }
+            updates.username = username;
+        }
+
+        if (email) {
+            const existingUserByEmail = await User.findOne({ email });
+            if (existingUserByEmail && existingUserByEmail.id !== req.user.id) {
+                return res.status(400).json({ message: 'Email already taken' });
+            }
+            updates.email = email;
+        }
+
+        // Add profileImage to updates only if provided
+        if (profileImage) {
+            updates.profileImage = profileImage;
+        }
+
+        // Update user with only the provided fields
         const updatedUser = await User.findByIdAndUpdate(
             req.user.id,
-            {
-                $set: {
-                    username,
-                    email,
-                    profileImage
-                }
-            },
+            { $set: updates },
             { new: true, select: '-password -blockedUsers' }
         );
 

@@ -4,16 +4,19 @@ import axiosInstance from "../../config/axios.js";
 import {BrokenCirclesLoader} from "react-loaders-kit";
 import getUserIdFromToken from "../../utils/getUserIdFromToken.js";
 import MediaViewer from "../../components/Media/MediaViewer.jsx";
+import notify from "../../utils/notify.js"
+import uploadFile from "../../utils/uploadFile.js"
+
 
 export default function Profile(){
     const { profileId } = useParams();
     const [activeTab, setActiveTab] = useState('posts');
     const [user, setUser] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [file, setFile] = useState(null);
     const [editForm, setEditForm] = useState({
         username: '',
         email: '',
-        profileImage: ''
     });
     const [posts, setPosts] = useState([]);
     const [friends, setFriends] = useState([]);
@@ -57,24 +60,42 @@ export default function Profile(){
         }
     };
 
+    const handleFileSelect = (e) => {
+        const selectedFile = e.target.files[0];
+        if (!selectedFile) return;
+
+        // File validation
+        const validTypes = [
+            // Image types
+            "image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp", "image/svg+xml",
+        ];
+
+        if (!validTypes.includes(selectedFile.type)) {
+            notify('Invalid file type. Please select an proper image.', "error");
+            return;
+        }
+
+        setFile(selectedFile); // Set the selected file
+    };
+
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         try {
+            const uploadedFileUrl = await uploadFile(file)
             const response = await axiosInstance.put(`/profile/update-profile`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(editForm)
+                username: editForm.username,
+                email: editForm.email,
+                profileImage: uploadedFileUrl
             });
 
             if (response.status === 200) {
                 const updatedUser = await response.data;
                 setUser(updatedUser);
                 setIsEditing(false);
+                notify("Profile updated successfully.", "success")
             }
         } catch (error) {
-            console.error('Error updating profile:', error);
+            notify('Error updating profile:', error);
         }
     };
 
@@ -102,13 +123,8 @@ export default function Profile(){
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Profile Image URL</label>
-                        <input
-                            type="text"
-                            value={editForm.profileImage}
-                            onChange={(e) => setEditForm({ ...editForm, profileImage: e.target.value })}
-                            className="w-full p-2 border rounded"
-                        />
+                        <label className="block text-sm font-medium mb-1">Profile Image</label>
+                        <input className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="file_input" type="file" accept=".png, .jpeg, .jpg, .gif, .webp, .svg"  onChange={handleFileSelect} />
                     </div>
                     <div className="flex justify-end space-x-2">
                         <button
