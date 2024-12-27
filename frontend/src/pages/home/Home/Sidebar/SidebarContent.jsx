@@ -21,7 +21,7 @@ export default function SidebarContent() {
                 <div className="size-10">
                     <img src={user?.profileImage || "/src/assets/person.png"} alt="no image" className="w-full h-full rounded-full" />
                 </div>
-                <h4 className="text-lg ms-3">Maria John</h4>
+                <h4 className="text-lg ms-3">{user?.username}</h4>
             </div>
             <div className="flex items-center px-3 py-3 rounded-lg cursor-pointer hover:bg-white ">
                 <FaUserFriends className="text-3xl rounded-full" />

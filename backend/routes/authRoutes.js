@@ -23,10 +23,10 @@ router.post('/login', [
 
 // Google OAuth routes
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
+router.get('/google/callback', passport.authenticate('google', { session: false, failureRedirect: '/' }), (req, res) => {
   // Generate a JWT token and send it back to the client
   const tokens = generateJWTokens(req.user);
-  res.json({ user: req.user, tokens });
+    res.redirect(`http://localhost:5173/login/success?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`);
 });
 
 // Refresh Token

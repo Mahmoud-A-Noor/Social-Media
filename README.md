@@ -1,6 +1,6 @@
 # MERN Stack Social Media App
 
-A feature-rich social media application built with the MERN stack. It provides a seamless social networking experience, allowing users to interact through posts, stories, likes, comments, and sharing. The app also includes secure authentication, real time notification, integrated chat feature, and cloud storage integration for rich media sharing.
+A feature-rich social media application built with the MERN stack. It provides a seamless social networking experience, allowing users to interact through posts, stories, likes, comments, and sharing. The app also includes secure authentication, real time notification, integrated chat feature, Live Stream, and cloud storage integration for rich media sharing.
 
 ---
 
@@ -68,7 +68,8 @@ A feature-rich social media application built with the MERN stack. It provides a
 4. Start the development server:
    ```bash
    # Start backend
-   npm run dev
+   cd frontend
+   nodemon server.js
 
    # Start frontend
    cd frontend
@@ -80,11 +81,11 @@ A feature-rich social media application built with the MERN stack. It provides a
 ---
 
 ## Screenshots
-
-### Authentication Page
+![Authentication Page](https://dummyimage.com/600x400/000/fff&text=Home+Screenshot)
+### Login & Register Pages
 ![Authentication Page](https://dummyimage.com/600x400/000/fff&text=Authentication+Page)
 
-### User Dashboard
+### User Profile
 ![User Dashboard](https://dummyimage.com/600x400/000/fff&text=User+Dashboard)
 
 ### Post Creation

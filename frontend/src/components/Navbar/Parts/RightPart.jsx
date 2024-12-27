@@ -188,7 +188,7 @@ export default function RightPart() {
                     }}>
                         <div className="flex items-center w-full p-2 mt-2 mb-4 border border-gray-400 rounded-lg cursor-pointer hover:bg-gray-200">
                             <img src={user?.profileImage || "/src/assets/person.png"} alt="no image" className="rounded-full size-9 me-2" />
-                            <h5 className="text-base font-semibold">Maria John</h5>
+                            <h5 className="text-base font-semibold">{user?.username}</h5>
                         </div>
                         <div className="px-2 pt-3 pb-3">
                             <div className="flex flex-row items-center justify-between px-3 py-3 rounded-lg cursor-pointer hover:bg-gray-100">
