@@ -7,6 +7,7 @@ import MediaViewer from "../../components/Media/MediaViewer.jsx";
 import notify from "../../utils/notify.js"
 import uploadFile from "../../utils/uploadFile.js"
 import {useAuth} from "../../context/authContext.jsx";
+import {ToastContainer} from "react-toastify";
 
 
 export default function Profile(){
@@ -247,8 +248,21 @@ export default function Profile(){
                     {renderTabContent()}
                 </div>
             </div>
-
             {isEditing && renderEditForm()}
+
+            <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                transition: Flip
+            />
         </div>
     );
 };
