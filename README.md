@@ -41,7 +41,6 @@ A feature-rich social media application built with the MERN stack. It provides a
 mern-social-media-app/
 ├── backend/            # Express.js backend
 ├── frontend/             # React.js frontend
-├── .env               # Environment variables
 ├── package.json       # Project metadata
 └── README.md          # Project documentation
 ```
@@ -62,24 +61,25 @@ mern-social-media-app/
    npm install
    ```
 
-3. Create a `.env` file in the frontend & backend directory and configure the following variables:
+3. Create a `.env` file in the frontend & backend directory and configure the following variables:<br /><br />
+   frontend `.env`
    ```frontend env
     VITE_API_BASE_URL=http://localhost:3000
    ```
+   backend `.env`
    ```backend env
     MONGO_URI=<your_mogodb_url>
     JWT_SECRET=<your_jwt_secret>
     REFRESH_TOKEN_SECRET=<your_refresh_token_secret>
     GOOGLE_CLIENT_ID=<your_google_client_id>
     GOOGLE_CLIENT_SECRET=<your_google_client_secret>
-    NODE_ENV=Development
     CLIENT_URL=http://localhost:5173
     CLOUDINARY_CLOUD_NAME=<your_cloudinary_cloud_name>
     CLOUDINARY_API_KEY=<your_cloudinary_api_key>
     CLOUDINARY_API_SECRET=<your_cloudinary_api_secret>
    ```
 
-4. Start the development server:
+5. Start the development server:
    ```bash
    # Start backend
    cd frontend
@@ -90,7 +90,7 @@ mern-social-media-app/
    npm start
    ```
 
-5. Open your browser and visit `http://localhost:3000`.
+6. Open your browser and visit `http://localhost:3000`.
 
 ---
 
