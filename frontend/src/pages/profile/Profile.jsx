@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from "../../config/axios.js";
 import {BrokenCirclesLoader} from "react-loaders-kit";
 import getUserIdFromToken from "../../utils/getUserIdFromToken.js";
@@ -8,10 +8,12 @@ import notify from "../../utils/notify.js"
 import uploadFile from "../../utils/uploadFile.js"
 import {useAuth} from "../../context/authContext.jsx";
 import {ToastContainer} from "react-toastify";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 
 export default function Profile(){
     const { profileId } = useParams();
+    const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState('posts');
     const {user, setUser} = useAuth();
     const [isEditing, setIsEditing] = useState(false);
@@ -82,11 +84,14 @@ export default function Profile(){
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         try {
-            const uploadedFileUrl = await uploadFile(file)
+            let uploadedFileUrl;
+            if(file){
+                uploadedFileUrl = await uploadFile(file)
+            }
             const response = await axiosInstance.put(`/profile/update-profile`, {
                 username: editForm.username,
                 email: editForm.email,
-                profileImage: uploadedFileUrl
+                profileImage: uploadedFileUrl?uploadedFileUrl:null
             });
 
             if (response.status === 200) {
@@ -96,7 +101,7 @@ export default function Profile(){
                 notify("Profile updated successfully.", "success")
             }
         } catch (error) {
-            notify('Error updating profile:', error);
+            notify('Error updating profile:', error?.data?.message);
         }
     };
 
@@ -205,7 +210,12 @@ export default function Profile(){
 
     return (
         <div className="max-w-4xl mx-auto p-4">
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="relative bg-white rounded-lg shadow-lg p-6">
+                <div className="absolute flex items-center justify-center left-2 top-2 size-7 rounded-full hover:bg-gray-200 cursor-pointer" onClick={()=>{
+                    navigate(-1)
+                }}>
+                    <IoMdArrowRoundBack className="text-2xl"/>
+                </div>
                 <div className="flex items-center space-x-6">
                     <img
                         src={user?.profileImage || '/src/assets/person.png'}
