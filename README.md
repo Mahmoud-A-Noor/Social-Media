@@ -35,6 +35,18 @@ A feature-rich social media application built with the MERN stack. It provides a
 
 ---
 
+## Project Structure
+
+```
+mern-social-media-app/
+├── backend/            # Express.js backend
+├── frontend/             # React.js frontend
+├── .env               # Environment variables
+├── package.json       # Project metadata
+└── README.md          # Project documentation
+```
+
+---
 ## Installation and Setup
 
 1. Clone the repository:
@@ -100,19 +112,6 @@ A feature-rich social media application built with the MERN stack. It provides a
 
 ### Real-time Notifications
 ![notifications](https://github.com/user-attachments/assets/a11cdad8-9371-45b9-a3b4-1684156f4332)
-
----
-
-## Folder Structure
-
-```
-mern-social-media-app/
-├── backend/            # Express.js backend
-├── frontend/             # React.js frontend
-├── .env               # Environment variables
-├── package.json       # Project metadata
-├── README.md          # Project documentation
-```
 
 ---
 
