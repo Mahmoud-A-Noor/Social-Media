@@ -12,7 +12,6 @@ export default function CreatePostForm() {
     const {postVisibility, setPostVisibility, postContent, setPostContent, file, setFile, fileUrl, setFileUrl, setIsModalOpen, feeling, setFeeling} = usePostContext()
     const {user} = useAuth();
 
-    console.log(user)
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();

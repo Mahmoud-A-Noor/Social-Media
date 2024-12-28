@@ -6,6 +6,7 @@ import Modal from "../../../../components/Modal/Modal.jsx";
 import {useEffect} from "react";
 import {usePostContext} from "../../../../context/CreatePostContext.jsx";
 import {useAuth} from "../../../../context/authContext.jsx";
+import {createPortal} from "react-dom";
 
 
 export default function CreatePostFormModal(){
@@ -72,7 +73,7 @@ export default function CreatePostFormModal(){
     }
 
     return(
-        <>
+        <div className="relative">
             <Modal isOpen={isModalOpen === true} onClose={() => {
                 setIsModalOpen(false)
                 setIsEmojiPickerOpen(false)
@@ -114,11 +115,6 @@ export default function CreatePostFormModal(){
                     <IoHappyOutline
                         className="text-5xl sm:max-md:text-xl xs:max-sm:text-lg rounded-full p-2 cursor-pointer hover:bg-gray-100"/>
                 </div>
-                {isEmojiPickerOpen &&
-                    <div ref={emojiPickerRef} className="absolute top-0 -right-[350px] z-30">
-                        <Picker data={data} onEmojiSelect={addEmoji}/>
-                    </div>
-                }
                 {file && (
                     <div className="flex items-center gap-2">
                         <p className="text-sm">{file.name}</p>
@@ -150,6 +146,17 @@ export default function CreatePostFormModal(){
                     <button className="form-button md:bg-none xs:bg-white" type="submit">Post</button>
                 </div>
             </Modal>
-        </>
+            {isEmojiPickerOpen && (
+
+                createPortal(
+                <div
+                    ref={emojiPickerRef}
+                    className="absolute top-[130px] right-[110px] z-[999999999999] bg-white shadow-lg rounded-lg"
+                >
+                    <Picker data={data} onEmojiSelect={addEmoji} />
+                </div>
+                ,document.getElementById("modal-root"))
+            )}
+        </div>
     )
 }
