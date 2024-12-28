@@ -83,21 +83,23 @@ A feature-rich social media application built with the MERN stack. It provides a
 ---
 
 ## Screenshots
-![Authentication Page](https://dummyimage.com/600x400/000/fff&text=Home+Screenshot)
+![home](https://github.com/user-attachments/assets/eb89aa98-b1f5-4ae1-acf9-b5270f71ba49)
+
 ### Login & Register Pages
-![Authentication Page](https://dummyimage.com/600x400/000/fff&text=Authentication+Page)
+![login](https://github.com/user-attachments/assets/27b3b739-f426-4a2e-b278-9efabe1212e1)
+![register](https://github.com/user-attachments/assets/b27e6675-7a40-44b9-84f6-29d53d36a7f1)
 
 ### User Profile
-![User Dashboard](https://dummyimage.com/600x400/000/fff&text=User+Dashboard)
+![profile](https://github.com/user-attachments/assets/b2d307db-8312-4cdd-b099-07774e968e9d)
 
 ### Post Creation
-![Post Creation](https://dummyimage.com/600x400/000/fff&text=Post+Creation)
+![create post](https://github.com/user-attachments/assets/c752d966-246c-4312-869b-248a0debcf75)
 
 ### Real-time Messaging
-![Messaging](https://dummyimage.com/600x400/000/fff&text=Messaging)
+![chat](https://github.com/user-attachments/assets/ef22fd13-65cf-40c1-8026-43160deb0df9)
 
-### Notifications
-![Notifications](https://dummyimage.com/600x400/000/fff&text=Notifications)
+### Real-time Notifications
+![notifications](https://github.com/user-attachments/assets/a11cdad8-9371-45b9-a3b4-1684156f4332)
 
 ---
 
