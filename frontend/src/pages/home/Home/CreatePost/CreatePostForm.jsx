@@ -12,6 +12,7 @@ export default function CreatePostForm() {
     const {postVisibility, setPostVisibility, postContent, setPostContent, file, setFile, fileUrl, setFileUrl, setIsModalOpen, feeling, setFeeling} = usePostContext()
     const {user} = useAuth();
 
+    console.log(user)
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
@@ -65,7 +66,7 @@ export default function CreatePostForm() {
                 </div>
                 <input onClick={() => setIsModalOpen((prev) => !prev)}
                        className="flex-1 px-4 py-2 transition-all duration-300 ease-in-out bg-gray-100 rounded-full outline-none placeholder:text-lg placeholder:sm:max-md:text-base placeholder:xs:max-sm:text-sm placeholder:text-gray-500 ms-3 hover:bg-gray-200 cursor-pointer"
-                       type="text" placeholder="What's on your mind, Mahmoud?"/>
+                       type="text" placeholder={`What's on your mind, ${user?.username?.split(" ")[0]}?`}/>
                 <CreatePostFormModal />
             </form>
         </>

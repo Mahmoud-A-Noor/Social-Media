@@ -5,11 +5,13 @@ import {FaPhotoVideo} from "react-icons/fa";
 import Modal from "../../../../components/Modal/Modal.jsx";
 import {useEffect} from "react";
 import {usePostContext} from "../../../../context/CreatePostContext.jsx";
+import {useAuth} from "../../../../context/authContext.jsx";
 
 
 export default function CreatePostFormModal(){
 
-    const {user, textAreaRef, emojiPickerButtonRef, emojiPickerRef, isEmojiPickerOpen, setIsEmojiPickerOpen, isModalOpen, setIsModalOpen, handleFileSelect, feeling, file, setFile, setFileUrl, postVisibility, setPostVisibility, postContent, setPostContent } = usePostContext()
+    const {textAreaRef, emojiPickerButtonRef, emojiPickerRef, isEmojiPickerOpen, setIsEmojiPickerOpen, isModalOpen, setIsModalOpen, handleFileSelect, feeling, file, setFile, setFileUrl, postVisibility, setPostVisibility, postContent, setPostContent } = usePostContext()
+    const {user} = useAuth()
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -80,7 +82,7 @@ export default function CreatePostFormModal(){
                         <img className="w-full h-full rounded-full " src={user?.profileImage || "/src/assets/person.png"} alt=""/>
                     </div>
                     <div>
-                        <h4 className="text-base font-semibold">Mahmoud Noor {feeling && renderFeelingText()}</h4>
+                        <h4 className="text-base font-semibold">{user?.username} {feeling && renderFeelingText()}</h4>
                         <div className="relative">
                             <select value={postVisibility}
                                     onChange={(e) => setPostVisibility((prev) => e.target.value)}
@@ -100,7 +102,7 @@ export default function CreatePostFormModal(){
                 </div>
                 <textarea
                     className="border-0 resize-none focus:outline-0 w-full my-3 text-xl px-2"
-                    placeholder="What's on your mind, Mahmoud?"
+                    placeholder={`What's on your mind, ${user?.username?.split(" ")[0]}?`}
                     ref={textAreaRef}
                     style={{maxHeight: "200px"}}
                     rows={1}
