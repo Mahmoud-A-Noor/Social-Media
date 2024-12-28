@@ -20,7 +20,6 @@ const isTokenExpired = (token) => {
 let isRefreshing = false;
 let refreshQueue = []; // To queue requests while refreshing the token
 
-// Refresh token function
 const refreshTokens = async () => {
     if (isRefreshing) {
         // Wait for the ongoing token refresh to complete
@@ -68,7 +67,6 @@ const refreshTokens = async () => {
     }
 };
 
-// Interceptor for adding access token to headers
 axiosInstance.interceptors.request.use(
     async (config) => {
         // Skip token check for refresh-token endpoint
@@ -96,10 +94,30 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Intercept responses to handle general errors
+const MAX_RETRIES = 3;
 axiosInstance.interceptors.response.use(
-    (response) => response,
-    (error) => Promise.reject(error)
+    (response) => {
+        // If the response is successful, simply return it
+        return response;
+    },
+    async (error) => {
+        // Check if the error is a network error
+        const isNetworkError = !error.response && error.message === 'Network Error';
+        const config = error.config;
+
+        if (!config._retryCount) {
+            config._retryCount = 0;
+        }
+
+        if (isNetworkError && config._retryCount < MAX_RETRIES) {
+            config._retryCount += 1;
+
+            // Retry the request
+            return axiosInstance(config);
+        }
+
+        return Promise.reject(error);
+    }
 );
 
 export default axiosInstance;
