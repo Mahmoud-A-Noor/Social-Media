@@ -34,7 +34,6 @@ export default function Profile(){
     const fetchUserData = async () => {
         try {
             const response = await axiosInstance.get(`/profile/${profileId}`);
-            console.log("Profile Response: ", response)
             const data = await response.data;
             setUser(data);
             setEditForm({
