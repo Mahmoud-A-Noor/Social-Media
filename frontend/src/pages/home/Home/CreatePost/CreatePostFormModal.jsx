@@ -6,10 +6,10 @@ import Modal from "../../../../components/Modal/Modal.jsx";
 import {useEffect} from "react";
 import {usePostContext} from "../../../../context/CreatePostContext.jsx";
 import {useAuth} from "../../../../context/authContext.jsx";
-import {createPortal} from "react-dom";
+import ReactDOM from "react-dom";
 
 
-export default function CreatePostFormModal(){
+export default function CreatePostFormModal({onSubmit}){
 
     const {textAreaRef, emojiPickerButtonRef, emojiPickerRef, isEmojiPickerOpen, setIsEmojiPickerOpen, isModalOpen, setIsModalOpen, handleFileSelect, feeling, file, setFile, setFileUrl, postVisibility, setPostVisibility, postContent, setPostContent } = usePostContext()
     const {user} = useAuth()
@@ -143,12 +143,12 @@ export default function CreatePostFormModal(){
                     </label>
                 </div>
                 <div className="flex flex-col text-center">
-                    <button className="form-button md:bg-none xs:bg-white" type="submit">Post</button>
+                    <button className="form-button md:bg-none xs:bg-white" onClick={onSubmit}>Post</button>
                 </div>
             </Modal>
             {isEmojiPickerOpen && (
 
-                createPortal(
+                ReactDOM.createPortal(
                 <div
                     ref={emojiPickerRef}
                     className="absolute top-[130px] right-[110px] z-[999999999999] bg-white shadow-lg rounded-lg"

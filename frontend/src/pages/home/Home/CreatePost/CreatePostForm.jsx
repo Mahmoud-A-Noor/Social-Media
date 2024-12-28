@@ -14,7 +14,6 @@ export default function CreatePostForm() {
 
 
     const handleFormSubmit = async (e) => {
-        e.preventDefault();
 
         if (!postContent && !file) {
             notify("Post content or file is required.", "error");
@@ -59,14 +58,14 @@ export default function CreatePostForm() {
 
     return(
         <>
-            <form className="flex items-center" onSubmit={handleFormSubmit}>
+            <form className="flex items-center">
                 <div className="size-12">
                     <img className="w-full h-full rounded-full " src={user?.profileImage || "/src/assets/person.png"} alt=""/>
                 </div>
                 <input onClick={() => setIsModalOpen((prev) => !prev)}
                        className="flex-1 px-4 py-2 transition-all duration-300 ease-in-out bg-gray-100 rounded-full outline-none placeholder:text-lg placeholder:sm:max-md:text-base placeholder:xs:max-sm:text-sm placeholder:text-gray-500 ms-3 hover:bg-gray-200 cursor-pointer"
                        type="text" placeholder={`What's on your mind, ${user?.username?.split(" ")[0]}?`}/>
-                <CreatePostFormModal />
+                <CreatePostFormModal onSubmit={handleFormSubmit} />
             </form>
         </>
     )
