@@ -8,7 +8,6 @@ A feature-rich social media application built with the MERN stack. It provides a
 
 - **Authentication**: Secure email/password login and Google OAuth integration.
 - **Social Interaction**: Users can create posts, stories, and engage with likes, comments, and sharing.
-- **Real-time Notifications**: Receive updates instantly for interactions and events.
 - **Real-Time Notifications**: Instantly receive updates for interactions, messages, and events to stay engaged.
 - **Rich Media Support**: Share images, videos, PDF documents, and other files with cloud storage integration for reliable and secure storage.
 - **Integrated Real-Time Chat**: Communicate with friends and groups instantly through real-time messaging.
